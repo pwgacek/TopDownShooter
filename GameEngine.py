@@ -51,8 +51,8 @@ class GameEngine:
             x, y = game_map.get_camera_position()
             self.screen.blit(game_map.image, pygame.math.Vector2(0, 0), pygame.Rect(x, y, 800, 600))
 
-            self.screen.blit(game_map.hero.image, game_map.hero.screen_position)
-            print(game_map.hero.map_position)
+            self.screen.blit(game_map.hero.rot_center(), game_map.hero.screen_position)
+            #print(game_map.hero.map_position)
 
 
             pygame.display.update()
