@@ -49,7 +49,8 @@ class GameEngine:
 
             game_map.move_hero(flag_up, flag_down, flag_left, flag_right)
             x, y = game_map.get_camera_position()
-            self.screen.blit(game_map.image, pygame.math.Vector2(0, 0), pygame.Rect(y, x, 800, 600))
-            self.screen.blit(game_map.hero.image, game_map.hero.screen_position)
+            self.screen.blit(game_map.image, pygame.math.Vector2(0, 0), pygame.Rect(x, y, 800, 600))
+
+            self.screen.blit(game_map.hero.rot_center(), game_map.hero.screen_position)
 
             pygame.display.update()

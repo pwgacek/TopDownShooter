@@ -8,7 +8,7 @@ class Map:
         self.width = 2000
         self.height = 2000
         self.image = pygame.image.load("assets/background.png")
-        self.hero = Hero(pygame.math.Vector2(999, 999), pygame.math.Vector2(400, 300))
+        self.hero = Hero(pygame.math.Vector2(1000, 1000), pygame.math.Vector2(375, 275))
 
     def move_hero(self, flag_up, flag_down, flag_left, flag_right):
 
@@ -25,8 +25,9 @@ class Map:
         else:
             change_x = 0.1
 
-        self.hero.map_position.x += change_y
-        self.hero.map_position.y += change_x
+        self.hero.map_position.x += change_x
+        self.hero.map_position.y += change_y
+        self.hero.set_angle()
 
     def get_camera_position(self):
         camera_x = self.hero.map_position.x - self.hero.screen_position.x
