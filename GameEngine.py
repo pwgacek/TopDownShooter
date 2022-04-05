@@ -14,10 +14,6 @@ class GameEngine:
         w, h = self.screen.get_size()
         running = True
         game_map = Map(pygame.math.Vector2(self.screen.get_size()))
-        flag_left = False
-        flag_right = False
-        flag_up = False
-        flag_down = False
 
         while running:
             self.screen.fill((0, 255, 0))
@@ -29,29 +25,29 @@ class GameEngine:
                 if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_w:
-                        flag_up = True
+                        game_map.hero.get_dir()["up"] = True
                     if event.key == pygame.K_s:
-                        flag_down = True
+                        game_map.hero.get_dir()["down"] = True
                     if event.key == pygame.K_a:
-                        flag_left = True
+                        game_map.hero.get_dir()["left"] = True
                     if event.key == pygame.K_d:
-                        flag_right = True
+                        game_map.hero.get_dir()["right"] = True
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_w:
-                        flag_up = False
+                        game_map.hero.get_dir()["up"] = False
                     if event.key == pygame.K_s:
-                        flag_down = False
+                        game_map.hero.get_dir()["down"] = False
                     if event.key == pygame.K_a:
-                        flag_left = False
+                        game_map.hero.get_dir()["left"] = False
                     if event.key == pygame.K_d:
-                        flag_right = False
+                        game_map.hero.get_dir()["right"] = False
 
-            game_map.move_hero(flag_up, flag_down, flag_left, flag_right)
+            game_map.move_hero()
             x, y = game_map.get_camera_position()
             self.screen.blit(game_map.image, pygame.math.Vector2(0, 0), pygame.Rect(x, y, 800, 600))
 
-            self.screen.blit(game_map.hero.rot_center(), game_map.hero.screen_position)
+            self.screen.blit(game_map.hero.rot_center(), game_map.hero.get_screen_pos())
             #print(game_map.hero.map_position)
 
 

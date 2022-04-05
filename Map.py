@@ -12,24 +12,24 @@ class Map:
         self.image = pygame.image.load("assets/background2.jpg")
         self.hero = Hero(pygame.math.Vector2(self.width/2, self.height/2), self.screen_size)
 
-    def move_hero(self, flag_up, flag_down, flag_left, flag_right):
+    def move_hero(self):
         move_speed = 0.3
 
-        if (flag_down and flag_up) or not (flag_down or flag_up):
+        if (self.hero.get_dir()["down"] and self.hero.get_dir()["up"]) or not (self.hero.get_dir()["down"] or self.hero.get_dir()["up"]):
             change_y = 0
-        elif flag_down:
+        elif self.hero.get_dir()["down"]:
             change_y = move_speed
         else:
             change_y = -move_speed
-        if (flag_left and flag_right) or not (flag_left or flag_right):
+        if (self.hero.get_dir()["left"] and self.hero.get_dir()["right"]) or not (self.hero.get_dir()["left"] or self.hero.get_dir()["right"]):
             change_x = 0
-        elif flag_left:
+        elif self.hero.get_dir()["left"]:
             change_x = -move_speed
         else:
             change_x = move_speed
 
-        destination_x = self.hero.map_position.x + change_x + self.hero.image.get_size()[0] / 2
-        destination_y = self.hero.map_position.y + change_y + self.hero.image.get_size()[1] / 2
+        destination_x = self.hero.get_map_pos().x + change_x + self.hero.get_image().get_size()[0] / 2
+        destination_y = self.hero.get_map_pos().y + change_y + self.hero.get_image().get_size()[1] / 2
 
         if change_x and change_y and self.can_move_to_y(destination_y):
             if self.can_move_to_x(destination_x):
@@ -37,14 +37,14 @@ class Map:
                 change_y /= math.sqrt(2)
 
         if self.can_move_to_x(destination_x):
-            self.hero.map_position.x += change_x
+            self.hero.get_map_pos().x += change_x
         if self.can_move_to_y(destination_y):
-            self.hero.map_position.y += change_y
+            self.hero.get_map_pos().y += change_y
         self.hero.set_angle()
 
     def get_camera_position(self):
-        camera_x = self.hero.map_position.x - self.hero.screen_position.x
-        camera_y = self.hero.map_position.y - self.hero.screen_position.y
+        camera_x = self.hero.get_map_pos().x - self.hero.get_screen_pos().x
+        camera_y = self.hero.get_map_pos().y - self.hero.get_screen_pos().y
         return camera_x, camera_y
 
     def can_move_to_x(self, x):
