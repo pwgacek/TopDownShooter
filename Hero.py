@@ -5,14 +5,12 @@ import pygame
 
 class Hero:
 
-    def __init__(self, map_position, screen_position):
-
+    def __init__(self, map_position,screen_size):
         self.map_position = map_position
-        self.screen_position = screen_position
         self.angle = 0
-        self.image = pygame.image.load("assets/hero.png")
-
-        # self.move_direction = "left"
+        self.image = pygame.image.load("assets/hero2.2.png")
+        self.screen_position = pygame.math.Vector2(screen_size.x/2 - self.image.get_size()[0]/2,
+                                                   screen_size.y/2 - self.image.get_size()[1]/2)
 
     def set_angle(self):
         center = self.screen_position.x + self.image.get_size()[0] / 2, self.screen_position.y + self.image.get_size()[

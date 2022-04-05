@@ -13,7 +13,7 @@ class GameEngine:
     def run(self):
         w, h = self.screen.get_size()
         running = True
-        game_map = Map(w, h)
+        game_map = Map(pygame.math.Vector2(self.screen.get_size()))
         flag_left = False
         flag_right = False
         flag_up = False

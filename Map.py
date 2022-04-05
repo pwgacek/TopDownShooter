@@ -5,13 +5,12 @@ from Hero import Hero
 
 
 class Map:
-    def __init__(self, w, h):
+    def __init__(self, screen_size):
         self.width = 2000
         self.height = 2000
-        self.window_width = w
-        self.window_height = h
+        self.screen_size = screen_size
         self.image = pygame.image.load("assets/background.png")
-        self.hero = Hero(pygame.math.Vector2(1000, 1000), pygame.math.Vector2(375, 275))
+        self.hero = Hero(pygame.math.Vector2(1000, 1000), self.screen_size)
 
     def move_hero(self, flag_up, flag_down, flag_left, flag_right):
         move_speed = 0.3
@@ -49,11 +48,11 @@ class Map:
         return camera_x, camera_y
 
     def can_move_to_x(self, x):
-        if self.window_width / 2 < x < self.width - self.window_width / 2:
+        if self.screen_size.x / 2 < x < self.width - self.screen_size.x / 2:
             return True
         return False
 
     def can_move_to_y(self, y):
-        if self.window_height / 2 < y < self.height - self.window_height / 2:
+        if self.screen_size.y / 2 < y < self.height - self.screen_size.y / 2:
             return True
         return False
