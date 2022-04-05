@@ -9,8 +9,8 @@ class Map:
         self.width = 2000
         self.height = 2000
         self.screen_size = screen_size
-        self.image = pygame.image.load("assets/background.png")
-        self.hero = Hero(pygame.math.Vector2(1000, 1000), self.screen_size)
+        self.image = pygame.image.load("assets/background2.jpg")
+        self.hero = Hero(pygame.math.Vector2(self.width/2, self.height/2), self.screen_size)
 
     def move_hero(self, flag_up, flag_down, flag_left, flag_right):
         move_speed = 0.3
