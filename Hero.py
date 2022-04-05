@@ -1,34 +1,31 @@
 import math
-
 import pygame
+from pygame.math import Vector2
 
 
 class Hero:
 
-
-    def __init__(self, map_position,screen_size):
+    def __init__(self, map_position, screen_size):
 
         self.__map_position = map_position
-        self.__screen_position =  pygame.math.Vector2(screen_size.x/2 - self.image.get_size()[0]/2,
-                                                   screen_size.y/2 - self.image.get_size()[1]/2)
+        self.__image = pygame.image.load("assets/hero2.2.png")
         self.__angle = 0
-        self.__image = pygame.image.load("assets/hero.png")
-        self.__dir = {"up": False, "down": False, "left": False, "right": False}
-
-        # self.move_direction = "left"
+        self.__screen_position = Vector2(screen_size.x / 2 - self.__image.get_size()[0] / 2,
+                                         screen_size.y / 2 - self.__image.get_size()[1] / 2)
 
     def set_angle(self):
-        center = self.__screen_position.x + self.__image.get_size()[0] / 2, self.__screen_position.y + \
-                 self.__image.get_size()[
-                     1] / 2
+        """sets value of self.__angle in accordance with mouse position"""
+
+        center = self.__screen_position.x + self.__image.get_size()[0] / 2, \
+                 self.__screen_position.y + self.__image.get_size()[1] / 2
         distance = math.dist(pygame.mouse.get_pos(), center)
         if distance > 1:
             self.__angle = math.degrees(math.acos((center[1] - pygame.mouse.get_pos()[1]) / distance))
             if center[0] < pygame.mouse.get_pos()[0]:
                 self.__angle = 360.0 - self.__angle
 
-    def rot_center(self):
-        """rotate an image while keeping its center and size"""
+    def get_rotated_image(self):
+        """ returns rotated  image while keeping its center and size"""
 
         orig_rect = self.__image.get_rect()
         rot_image = pygame.transform.rotate(self.__image, self.__angle)
@@ -37,14 +34,11 @@ class Hero:
         rot_image = rot_image.subsurface(rot_rect).copy()
         return rot_image
 
-    def get_dir(self):
-        return self.__dir
-
     def get_image(self):
         return self.__image
 
-    def get_screen_pos(self):
+    def get_screen_position(self):
         return self.__screen_position
 
-    def get_map_pos(self):
+    def get_map_position(self):
         return self.__map_position

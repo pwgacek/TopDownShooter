@@ -1,22 +1,23 @@
 import pygame
-from Hero import Hero
 from Map import Map
+from pygame.math import Vector2
 
 
 class GameEngine:
     def __init__(self):
         pygame.init()
-        # self.screen = pygame.Surface((800, 600))
-        self.screen = pygame.display.set_mode((800, 600))
+        self.__screen = pygame.display.set_mode((800, 600))
+        self.__map = Map(Vector2(self.__screen.get_size()))
         pygame.display.set_caption("Top-Down Shooter")
 
     def run(self):
-        w, h = self.screen.get_size()
         running = True
-        game_map = Map(pygame.math.Vector2(self.screen.get_size()))
 
+        """set true if key is pressed"""
+        move_direction_flags = {"up": False, "down": False, "left": False, "right": False}
+
+        """main game loop"""
         while running:
-            self.screen.fill((0, 255, 0))
 
             for event in pygame.event.get():
 
@@ -25,30 +26,28 @@ class GameEngine:
                 if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_w:
-                        game_map.hero.get_dir()["up"] = True
+                        move_direction_flags["up"] = True
                     if event.key == pygame.K_s:
-                        game_map.hero.get_dir()["down"] = True
+                        move_direction_flags["down"] = True
                     if event.key == pygame.K_a:
-                        game_map.hero.get_dir()["left"] = True
+                        move_direction_flags["left"] = True
                     if event.key == pygame.K_d:
-                        game_map.hero.get_dir()["right"] = True
+                        move_direction_flags["right"] = True
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_w:
-                        game_map.hero.get_dir()["up"] = False
+                        move_direction_flags["up"] = False
                     if event.key == pygame.K_s:
-                        game_map.hero.get_dir()["down"] = False
+                        move_direction_flags["down"] = False
                     if event.key == pygame.K_a:
-                        game_map.hero.get_dir()["left"] = False
+                        move_direction_flags["left"] = False
                     if event.key == pygame.K_d:
-                        game_map.hero.get_dir()["right"] = False
+                        move_direction_flags["right"] = False
 
-            game_map.move_hero()
-            x, y = game_map.get_camera_position()
-            self.screen.blit(game_map.image, pygame.math.Vector2(0, 0), pygame.Rect(x, y, 800, 600))
+            self.__map.move_hero(move_direction_flags)
 
-            self.screen.blit(game_map.hero.rot_center(), game_map.hero.get_screen_pos())
-            #print(game_map.hero.map_position)
-
+            camera_x, camera_y = self.__map.get_camera_position()
+            self.__screen.blit(self.__map.get_image(), Vector2(0, 0), pygame.Rect(camera_x, camera_y, 800, 600))
+            self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())
 
             pygame.display.update()
