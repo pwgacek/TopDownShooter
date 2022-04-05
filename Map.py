@@ -16,21 +16,21 @@ class Map:
     def move_hero(self):
         move_speed = 0.3
 
-        if (self.hero.dir["down"] and self.hero.dir["up"]) or not (self.hero.dir["down"] or self.hero.dir["up"]):
+        if (self.hero.get_dir()["down"] and self.hero.get_dir()["up"]) or not (self.hero.get_dir()["down"] or self.hero.get_dir()["up"]):
             change_y = 0
-        elif self.hero.dir["down"]:
+        elif self.hero.get_dir()["down"]:
             change_y = move_speed
         else:
             change_y = -move_speed
-        if (self.hero.dir["left"] and self.hero.dir["right"]) or not (self.hero.dir["left"] or self.hero.dir["right"]):
+        if (self.hero.get_dir()["left"] and self.hero.get_dir()["right"]) or not (self.hero.get_dir()["left"] or self.hero.get_dir()["right"]):
             change_x = 0
-        elif self.hero.dir["left"]:
+        elif self.hero.get_dir()["left"]:
             change_x = -move_speed
         else:
             change_x = move_speed
 
-        destination_x = self.hero.map_position.x + change_x + self.hero.image.get_size()[0] / 2
-        destination_y = self.hero.map_position.y + change_y + self.hero.image.get_size()[1] / 2
+        destination_x = self.hero.get_map_pos().x + change_x + self.hero.get_image().get_size()[0] / 2
+        destination_y = self.hero.get_map_pos().y + change_y + self.hero.get_image().get_size()[1] / 2
 
         if change_x and change_y and self.can_move_to_y(destination_y):
             if self.can_move_to_x(destination_x):
@@ -38,14 +38,14 @@ class Map:
                 change_y /= math.sqrt(2)
 
         if self.can_move_to_x(destination_x):
-            self.hero.map_position.x += change_x
+            self.hero.get_map_pos().x += change_x
         if self.can_move_to_y(destination_y):
-            self.hero.map_position.y += change_y
+            self.hero.get_map_pos().y += change_y
         self.hero.set_angle()
 
     def get_camera_position(self):
-        camera_x = self.hero.map_position.x - self.hero.screen_position.x
-        camera_y = self.hero.map_position.y - self.hero.screen_position.y
+        camera_x = self.hero.get_map_pos().x - self.hero.get_screen_pos().x
+        camera_y = self.hero.get_map_pos().y - self.hero.get_screen_pos().y
         return camera_x, camera_y
 
     def can_move_to_x(self, x):
