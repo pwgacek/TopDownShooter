@@ -11,6 +11,7 @@ class Hero:
         self.screen_position = screen_position
         self.angle = 0
         self.image = pygame.image.load("assets/hero.png")
+        self.dir = {"up":False, "down":False, "left":False, "right":False}
 
         # self.move_direction = "left"
 

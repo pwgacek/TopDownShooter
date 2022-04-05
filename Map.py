@@ -13,18 +13,18 @@ class Map:
         self.image = pygame.image.load("assets/background.png")
         self.hero = Hero(pygame.math.Vector2(1000, 1000), pygame.math.Vector2(375, 275))
 
-    def move_hero(self, flag_up, flag_down, flag_left, flag_right):
+    def move_hero(self):
         move_speed = 0.3
 
-        if (flag_down and flag_up) or not (flag_down or flag_up):
+        if (self.hero.dir["down"] and self.hero.dir["up"]) or not (self.hero.dir["down"] or self.hero.dir["up"]):
             change_y = 0
-        elif flag_down:
+        elif self.hero.dir["down"]:
             change_y = move_speed
         else:
             change_y = -move_speed
-        if (flag_left and flag_right) or not (flag_left or flag_right):
+        if (self.hero.dir["left"] and self.hero.dir["right"]) or not (self.hero.dir["left"] or self.hero.dir["right"]):
             change_x = 0
-        elif flag_left:
+        elif self.hero.dir["left"]:
             change_x = -move_speed
         else:
             change_x = move_speed
