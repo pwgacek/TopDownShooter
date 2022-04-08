@@ -12,6 +12,8 @@ class GameEngine:
 
     def run(self):
         running = True
+        fps = 60
+        fps_clock = pygame.time.Clock()
 
         """set true if key is pressed"""
         move_direction_flags = {"up": False, "down": False, "left": False, "right": False}
@@ -44,10 +46,11 @@ class GameEngine:
                     if event.key == pygame.K_d:
                         move_direction_flags["right"] = False
 
-            self.__map.move_hero(move_direction_flags)
+            self.__map.move_hero(move_direction_flags, fps)
 
             camera_x, camera_y = self.__map.get_camera_position()
             self.__screen.blit(self.__map.get_image(), Vector2(0, 0), pygame.Rect(camera_x, camera_y, 800, 600))
             self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())
 
             pygame.display.update()
+            fps_clock.tick(fps)
