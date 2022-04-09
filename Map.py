@@ -13,8 +13,8 @@ class Map:
         self.__image = pygame.image.load("assets/background2.jpg")
         self.__hero = Hero(Vector2(self.__width / 2, self.__height / 2), self.__screen_size)
 
-    def move_hero(self, move_direction_flags):
-        move_speed = 0.3
+    def move_hero(self, move_direction_flags, fps):
+        move_speed = 0.3*fps/3
 
         if (move_direction_flags["down"] and move_direction_flags["up"]) or \
                 not (move_direction_flags["down"] or move_direction_flags["up"]):
