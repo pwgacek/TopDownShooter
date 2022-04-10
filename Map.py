@@ -52,50 +52,57 @@ class Map:
 
     def move_monsters(self, move_speed):
 
-        half_image_size = self.__hero.get_image().get_size()[1] / 2
+        max_distance = self.__hero.get_image().get_size()[1] / 2
         for monster in self.__monsters:
-            if math.dist(monster.get_map_position(), self.__hero.get_map_position()) > half_image_size:
+            if math.dist(monster.get_map_position(), self.__hero.get_map_position()) > max_distance:
+
                 x = monster.get_map_position().x + monster.get_unit_vector().x * move_speed
                 y = monster.get_map_position().y + monster.get_unit_vector().y * move_speed
+
                 xl = monster.get_map_position().x + monster.get_unit_vector(
                     (monster.get_angle() - 60) % 360).x * move_speed
                 yl = monster.get_map_position().y + monster.get_unit_vector(
                     (monster.get_angle() - 60) % 360).y * move_speed
+
                 xr = monster.get_map_position().x + monster.get_unit_vector(
                     (monster.get_angle() + 60) % 360).x * move_speed
                 yr = monster.get_map_position().y + monster.get_unit_vector(
                     (monster.get_angle() + 60) % 360).y * move_speed
+
                 can_move = True
-                can_move_after_left_rotate = True
-                can_move_after_right_rotate = True
+                can_turn_left = True
+                can_turn_right = True
 
-                for monster2 in self.__monsters:
-                    distance = math.dist(monster.get_map_position(), monster2.get_map_position())
+                for other_monster in self.__monsters:
+                    distance = math.dist(monster.get_map_position(), other_monster.get_map_position())
 
-                    if monster2 != monster and distance < half_image_size:
-                        if distance >= math.dist(Vector2(x, y), monster2.get_map_position()):
+                    if other_monster != monster and distance < max_distance:
+                        """Given monster can't go straight check if he turn left or right """
+
+                        if distance >= math.dist(Vector2(x, y), other_monster.get_map_position()):
                             can_move = False
-                        if distance >= math.dist(Vector2(xl, yl), monster2.get_map_position()):
-                            can_move_after_left_rotate = False
-                        if distance >= math.dist(Vector2(xr, yr), monster2.get_map_position()):
-                            can_move_after_right_rotate = False
+                        if distance >= math.dist(Vector2(xl, yl), other_monster.get_map_position()):
+                            can_turn_left = False
+                        if distance >= math.dist(Vector2(xr, yr), other_monster.get_map_position()):
+                            can_turn_right = False
 
-                        if not (can_move or can_move_after_right_rotate or can_move_after_left_rotate):
+                        if not (can_move or can_turn_right or can_turn_left):
                             break
 
-                monster.set_angle(self.__hero.get_map_position())
+                """set new cords"""
                 if can_move:
                     monster.get_map_position().x = x
                     monster.get_map_position().y = y
 
-                elif can_move_after_left_rotate:
+                elif can_turn_left:
                     monster.get_map_position().x = xl
                     monster.get_map_position().y = yl
-                    monster.set_angle(self.__hero.get_map_position())
-                elif can_move_after_right_rotate:
+
+                elif can_turn_right:
                     monster.get_map_position().x = xr
                     monster.get_map_position().y = yr
-                    monster.set_angle(self.__hero.get_map_position(),)
+
+                monster.set_angle(self.__hero.get_map_position())
 
     def get_camera_position(self):
         """get position of rectangle (cut out of background image) which will be shown on the screen"""
@@ -119,6 +126,7 @@ class Map:
         return self.__monsters
 
     def add_monster(self):
+
         x = randint(0, self.__width)
         y = randint(0, self.__height)
         self.__monsters.append(Monster(Vector2(x, y)))
