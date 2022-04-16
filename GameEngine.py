@@ -16,7 +16,7 @@ class GameEngine:
         fps_clock = pygame.time.Clock()
         """set true if key is pressed"""
         move_direction_flags = {"up": False, "down": False, "left": False, "right": False}
-        for i in range(10):
+        for i in range(20):
             self.__map.add_monster()
 
         """main game loop"""
