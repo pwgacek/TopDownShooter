@@ -2,8 +2,11 @@ import pygame
 import math
 
 from Hero import Hero
+from Monster import Monster
 from pygame.math import Vector2
 from Bullet import Bullet
+from random import randint
+
 
 
 class Map:
@@ -15,9 +18,10 @@ class Map:
         self.__hero = Hero(Vector2(self.__width / 2, self.__height / 2), self.__screen_size)
         self.bullets = []
         self.font = pygame.font.SysFont('arial', 32)
+        self.__monsters = list()
 
-    def move_hero(self, move_direction_flags, fps):
-        move_speed = 0.3*fps/3
+
+    def move_hero(self, move_direction_flags, move_speed):
 
         if (move_direction_flags["down"] and move_direction_flags["up"]) or \
                 not (move_direction_flags["down"] or move_direction_flags["up"]):
@@ -51,11 +55,65 @@ class Map:
 
         self.__hero.set_angle()
 
+    def move_monsters(self, move_speed):
+
+        max_distance = self.__hero.get_image().get_size()[1] / 2
+        for monster in self.__monsters:
+            if math.dist(monster.get_map_position(), self.__hero.get_map_position()) > max_distance:
+
+                x = monster.get_map_position().x + monster.get_unit_vector().x * move_speed
+                y = monster.get_map_position().y + monster.get_unit_vector().y * move_speed
+
+                xl = monster.get_map_position().x + monster.get_unit_vector(
+                    (monster.get_angle() - 60) % 360).x * move_speed
+                yl = monster.get_map_position().y + monster.get_unit_vector(
+                    (monster.get_angle() - 60) % 360).y * move_speed
+
+                xr = monster.get_map_position().x + monster.get_unit_vector(
+                    (monster.get_angle() + 60) % 360).x * move_speed
+                yr = monster.get_map_position().y + monster.get_unit_vector(
+                    (monster.get_angle() + 60) % 360).y * move_speed
+
+                can_move = True
+                can_turn_left = True
+                can_turn_right = True
+
+                for other_monster in self.__monsters:
+                    distance = math.dist(monster.get_map_position(), other_monster.get_map_position())
+
+                    if other_monster != monster and distance < max_distance:
+                        """Given monster can't go straight check if he turn left or right """
+
+                        if distance >= math.dist(Vector2(x, y), other_monster.get_map_position()):
+                            can_move = False
+                        if distance >= math.dist(Vector2(xl, yl), other_monster.get_map_position()):
+                            can_turn_left = False
+                        if distance >= math.dist(Vector2(xr, yr), other_monster.get_map_position()):
+                            can_turn_right = False
+
+                        if not (can_move or can_turn_right or can_turn_left):
+                            break
+
+                """set new cords"""
+                if can_move:
+                    monster.get_map_position().x = x
+                    monster.get_map_position().y = y
+
+                elif can_turn_left:
+                    monster.get_map_position().x = xl
+                    monster.get_map_position().y = yl
+
+                elif can_turn_right:
+                    monster.get_map_position().x = xr
+                    monster.get_map_position().y = yr
+
+                monster.set_angle(self.__hero.get_map_position())
+
     def get_camera_position(self):
         """get position of rectangle (cut out of background image) which will be shown on the screen"""
         camera_x = self.__hero.get_map_position().x - self.__hero.get_screen_position().x
         camera_y = self.__hero.get_map_position().y - self.__hero.get_screen_position().y
-        return camera_x, camera_y
+        return Vector2(camera_x, camera_y)
 
     def __can_move_to_x(self, x):
         return self.__screen_size.x / 2 < x < self.__width - self.__screen_size.x / 2
@@ -68,6 +126,7 @@ class Map:
 
     def get_hero(self):
         return self.__hero
+
 
     def add_bullet(self):
         self.__hero.bullets -= 1
@@ -98,3 +157,17 @@ class Map:
 
     def show_ammo(self):
         return self.font.render("Ammo amount: "+ str(self.__hero.bullets), True, (255, 0, 0))
+
+    def get_monsters(self):
+        return self.__monsters
+
+    def add_monster(self):
+
+        x = randint(0, self.__width)
+        y = randint(0, self.__height)
+        self.__monsters.append(Monster(Vector2(x, y)))
+        print(x, y)
+
+    def __remove_monster(self, monster):
+        self.__monsters.remove(monster)
+
