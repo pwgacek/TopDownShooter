@@ -156,7 +156,7 @@ class Map:
                 self.bullets.remove(i)
 
     def show_ammo(self):
-        return self.font.render("Ammo amount: "+ str(self.__hero.bullets), True, (255, 0, 0))
+        return self.font.render("Ammo amount: "+ str(self.__hero.bullets) + "  reload (r)", True, (255, 0, 0))
 
     def get_monsters(self):
         return self.__monsters

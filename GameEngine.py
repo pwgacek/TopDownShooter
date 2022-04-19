@@ -57,11 +57,9 @@ class GameEngine:
 
 
             prev = self.__map.get_camera_position()
-            self.__map.move_hero(move_direction_flags, fps)
 
             self.__map.move_hero(move_direction_flags, fps*0.1)
             self.__map.move_monsters(fps*0.02)
-
 
             camera_position = self.__map.get_camera_position()
             """shows map on the screen"""
