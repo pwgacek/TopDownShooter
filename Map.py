@@ -3,6 +3,7 @@ import math
 
 from Hero import Hero
 from pygame.math import Vector2
+from Bullet import Bullet
 
 
 class Map:
@@ -12,6 +13,8 @@ class Map:
         self.__screen_size = screen_size
         self.__image = pygame.image.load("assets/background2.jpg")
         self.__hero = Hero(Vector2(self.__width / 2, self.__height / 2), self.__screen_size)
+        self.bullets = []
+        self.font = pygame.font.SysFont('arial', 32)
 
     def move_hero(self, move_direction_flags, fps):
         move_speed = 0.3*fps/3
@@ -65,3 +68,33 @@ class Map:
 
     def get_hero(self):
         return self.__hero
+
+    def add_bullet(self):
+        self.__hero.bullets -= 1
+        a = self.__hero.get_map_position()[0]
+        b = self.__hero.get_map_position()[1]
+
+        x = pygame.math.Vector2(a, b)
+        y = self.__hero.get_angle()
+        if y >= 270:
+            y -= 270
+        else:
+            y += 90
+        z = self.__screen_size
+        self.bullets.append(Bullet(x, y, z))
+
+    def update_bullets(self, camera_x, camera_y):
+        for i in self.bullets:
+            i.update_screen_pos(camera_x, camera_y)
+
+    def move_bullets(self):
+        for i in self.bullets:
+            i.move()
+
+    def remove_bullets(self):
+        for i in self.bullets:
+            if i.map_position[0] > 2000 or i.map_position[1] > 2000 or i.map_position[0] < 0 or i.map_position[1] < 0:
+                self.bullets.remove(i)
+
+    def show_ammo(self):
+        return self.font.render("Ammo amount: "+ str(self.__hero.bullets), True, (255, 0, 0))

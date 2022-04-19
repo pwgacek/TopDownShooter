@@ -25,7 +25,14 @@ class GameEngine:
 
                 if event.type == pygame.QUIT:
                     running = False
+
+                if event.type == pygame.MOUSEBUTTONDOWN and self.__map.get_hero().bullets > 0:
+                    self.__map.add_bullet()
+
                 if event.type == pygame.KEYDOWN:
+
+                    if event.key == pygame.K_r:
+                        self.__map.get_hero().bullets = 8
 
                     if event.key == pygame.K_w:
                         move_direction_flags["up"] = True
@@ -46,11 +53,19 @@ class GameEngine:
                     if event.key == pygame.K_d:
                         move_direction_flags["right"] = False
 
+            prev_x, prev_y = self.__map.get_camera_position()
             self.__map.move_hero(move_direction_flags, fps)
 
             camera_x, camera_y = self.__map.get_camera_position()
             self.__screen.blit(self.__map.get_image(), Vector2(0, 0), pygame.Rect(camera_x, camera_y, 800, 600))
             self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())
-
+            self.__screen.blit(self.__map.show_ammo(), (20, 550))
+            x = camera_x-prev_x
+            y = camera_y - prev_y
+            self.__map.update_bullets(x, y)
+            for i in self.__map.bullets:
+                self.__screen.blit(i.image, i.screen_position)
+            self.__map.move_bullets()
+            self.__map.remove_bullets()
             pygame.display.update()
             fps_clock.tick(fps)

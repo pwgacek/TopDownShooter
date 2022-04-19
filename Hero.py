@@ -12,6 +12,7 @@ class Hero:
         self.__angle = 0
         self.__screen_position = Vector2(screen_size.x / 2 - self.__image.get_size()[0] / 2,
                                          screen_size.y / 2 - self.__image.get_size()[1] / 2)
+        self.bullets = 8
 
     def set_angle(self):
         """sets value of self.__angle in accordance with mouse position"""
@@ -42,3 +43,6 @@ class Hero:
 
     def get_map_position(self):
         return self.__map_position
+
+    def get_angle(self):
+        return self.__angle
