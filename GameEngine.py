@@ -28,13 +28,13 @@ class GameEngine:
                 if event.type == pygame.QUIT:
                     running = False
 
-                if event.type == pygame.MOUSEBUTTONDOWN and self.__map.get_hero().bullets > 0:
+                if event.type == pygame.MOUSEBUTTONDOWN and self.__map.get_hero().get_ammo() > 0:
                     self.__map.add_bullet()
 
                 if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_r:
-                        self.__map.get_hero().bullets = 8
+                        self.__map.get_hero().set_ammo(8)
 
                     if event.key == pygame.K_w:
                         move_direction_flags["up"] = True
@@ -55,7 +55,7 @@ class GameEngine:
                     if event.key == pygame.K_d:
                         move_direction_flags["right"] = False
 
-
+            """screen position before hero movement"""
             prev = self.__map.get_camera_position()
 
             self.__map.move_hero(move_direction_flags, fps*0.1)
@@ -68,11 +68,15 @@ class GameEngine:
             """shows hero on the screen"""
             self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())
 
-            self.__screen.blit(self.__map.show_ammo(), (20, 550))
+            """shows bullets, their movement and removal"""
+            #self.__screen.blit(self.__map.show_ammo(), (20, 550))
+            self.__map.show_ammo2(self.__screen)
             diff = Vector2(camera_position[0]-prev[0], camera_position[1]- prev[1])
             self.__map.update_bullets(diff[0], diff[1])
-            for i in self.__map.bullets:
-                self.__screen.blit(i.image, i.screen_position)
+
+            for i in self.__map.get_bullets():
+                self.__screen.blit(i.get_image(), i.get_screen_position())
+
             self.__map.move_bullets()
             self.__map.remove_bullets()
 

@@ -16,8 +16,8 @@ class Map:
         self.__screen_size = screen_size
         self.__image = pygame.image.load("assets/background2.jpg")
         self.__hero = Hero(Vector2(self.__width / 2, self.__height / 2), self.__screen_size)
-        self.bullets = []
-        self.font = pygame.font.SysFont('arial', 32)
+        self.__bullets = list()
+        self.__font = pygame.font.SysFont('Bradley Hand ITC', 50, bold = pygame.font.Font.bold)
         self.__monsters = list()
 
 
@@ -127,9 +127,8 @@ class Map:
     def get_hero(self):
         return self.__hero
 
-
     def add_bullet(self):
-        self.__hero.bullets -= 1
+        self.__hero.set_ammo(self.__hero.get_ammo() -1)
         a = self.__hero.get_map_position()[0]
         b = self.__hero.get_map_position()[1]
 
@@ -140,33 +139,48 @@ class Map:
         else:
             y += 90
         z = self.__screen_size
-        self.bullets.append(Bullet(x, y, z))
+        self.__bullets.append(Bullet(x, y, z))
 
     def update_bullets(self, camera_x, camera_y):
-        for i in self.bullets:
+        for i in self.__bullets:
             i.update_screen_pos(camera_x, camera_y)
 
     def move_bullets(self):
-        for i in self.bullets:
+        for i in self.__bullets:
             i.move()
 
     def remove_bullets(self):
-        for i in self.bullets:
-            if i.map_position[0] > 2000 or i.map_position[1] > 2000 or i.map_position[0] < 0 or i.map_position[1] < 0:
-                self.bullets.remove(i)
+        for i in self.__bullets:
+            if self.bullet_not_in_bounds(i):
+                self.__bullets.remove(i)
+
+    def bullet_not_in_bounds(self, bullet):
+        return  bullet.get_map_position()[0] > 2000 or bullet.get_map_position()[1] > 2000 or bullet.get_map_position()[0] < 0 or bullet.get_map_position()[1] < 0
 
     def show_ammo(self):
-        return self.font.render("Ammo amount: "+ str(self.__hero.bullets) + "  reload (r)", True, (255, 0, 0))
+        return self.__font.render("Ammo: "+ str(self.__hero.bullets) + "  reload (r)", True, (255, 0, 0))
 
     def get_monsters(self):
         return self.__monsters
 
-    def add_monster(self):
+    def get_bullets(self):
+        return self.__bullets
 
+    def get_font(self):
+        return self.__font
+
+    def show_ammo2(self, screen):
+        x = 20
+        for i in range(self.__hero.get_ammo()):
+            screen.blit(pygame.image.load("assets/ammo1.png"), (x, 520))
+            x += 41
+        screen.blit(self.__font.render("Reload (r)", True, (255, 0, 0)), (400, 530))
+
+
+    def add_monster(self):
         x = randint(0, self.__width)
         y = randint(0, self.__height)
         self.__monsters.append(Monster(Vector2(x, y)))
-        print(x, y)
 
     def __remove_monster(self, monster):
         self.__monsters.remove(monster)
