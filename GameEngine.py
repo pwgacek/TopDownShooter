@@ -6,7 +6,9 @@ from pygame.math import Vector2
 class GameEngine:
     def __init__(self):
         pygame.init()
-        self.__screen = pygame.display.set_mode((800, 600))
+        self.__width = 800
+        self.__height = 600
+        self.__screen = pygame.display.set_mode((self.__width, self.__height))
         self.__map = Map(Vector2(self.__screen.get_size()))
         pygame.display.set_caption("Top-Down Shooter")
 
@@ -64,7 +66,7 @@ class GameEngine:
             camera_position = self.__map.get_camera_position()
             """shows map on the screen"""
             self.__screen.blit(self.__map.get_image(), Vector2(0, 0),
-                               pygame.Rect(camera_position.x, camera_position.y, 800, 600))
+                               pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
             """shows hero on the screen"""
             self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())
 
