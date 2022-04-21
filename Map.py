@@ -8,7 +8,6 @@ from Bullet import Bullet
 from random import randint
 
 
-
 class Map:
     def __init__(self, screen_size):
         self.__width = 2000
@@ -17,9 +16,9 @@ class Map:
         self.__image = pygame.image.load("assets/background2.jpg")
         self.__hero = Hero(Vector2(self.__width / 2, self.__height / 2), self.__screen_size)
         self.__bullets = list()
-        self.__font = pygame.font.SysFont('Bradley Hand ITC', 50, bold = pygame.font.Font.bold)
+        self.__font = pygame.font.SysFont('Bradley Hand ITC', 50, bold=pygame.font.Font.bold)
         self.__monsters = list()
-
+        self.__bullet_image = pygame.image.load("assets/ammo1.png")
 
     def move_hero(self, move_direction_flags, move_speed):
 
@@ -128,7 +127,7 @@ class Map:
         return self.__hero
 
     def add_bullet(self):
-        self.__hero.set_ammo(self.__hero.get_ammo() -1)
+        self.__hero.set_ammo(self.__hero.get_ammo() - 1)
         a = self.__hero.get_map_position()[0]
         b = self.__hero.get_map_position()[1]
 
@@ -155,10 +154,8 @@ class Map:
                 self.__bullets.remove(i)
 
     def bullet_not_in_bounds(self, bullet):
-        return  bullet.get_map_position()[0] > 2000 or bullet.get_map_position()[1] > 2000 or bullet.get_map_position()[0] < 0 or bullet.get_map_position()[1] < 0
-
-    def show_ammo(self):
-        return self.__font.render("Ammo: "+ str(self.__hero.bullets) + "  reload (r)", True, (255, 0, 0))
+        return bullet.get_map_position()[0] > self.__width or bullet.get_map_position()[1] > self.__height or \
+               bullet.get_map_position()[0] < 0 or bullet.get_map_position()[1] < 0
 
     def get_monsters(self):
         return self.__monsters
@@ -172,10 +169,10 @@ class Map:
     def show_ammo2(self, screen):
         x = 20
         for i in range(self.__hero.get_ammo()):
-            screen.blit(pygame.image.load("assets/ammo1.png"), (x, 520))
-            x += 41
-        screen.blit(self.__font.render("Reload (r)", True, (255, 0, 0)), (400, 530))
+            screen.blit(self.__bullet_image, (x, 520))
+            x += self.__bullet_image.get_size()[0]
 
+    # screen.blit(self.__font.render("Reload (r)", True, (255, 0, 0)), (400, 530))
 
     def add_monster(self):
         x = randint(0, self.__width)
@@ -184,4 +181,3 @@ class Map:
 
     def __remove_monster(self, monster):
         self.__monsters.remove(monster)
-

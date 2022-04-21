@@ -70,8 +70,13 @@ class GameEngine:
             """shows hero on the screen"""
             self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())
 
+            """shows monsters on the screen"""
+            for monster in self.__map.get_monsters():
+                self.__screen.blit(monster.get_rotated_image(),
+                                   monster.get_screen_position(self.__map.get_camera_position()))
+
             """shows bullets, their movement and removal"""
-            #self.__screen.blit(self.__map.show_ammo(), (20, 550))
+
             self.__map.show_ammo2(self.__screen)
             diff = Vector2(camera_position[0]-prev[0], camera_position[1]- prev[1])
             self.__map.update_bullets(diff[0], diff[1])
@@ -81,12 +86,6 @@ class GameEngine:
 
             self.__map.move_bullets()
             self.__map.remove_bullets()
-
-            """shows monsters on the screen"""
-            for monster in self.__map.get_monsters():
-                self.__screen.blit(monster.get_rotated_image(),
-                                   monster.get_screen_position(self.__map.get_camera_position()))
-
 
             pygame.display.update()
             fps_clock.tick(fps)
