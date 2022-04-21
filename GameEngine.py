@@ -72,8 +72,9 @@ class GameEngine:
 
             """shows monsters on the screen"""
             for monster in self.__map.get_monsters():
-                self.__screen.blit(monster.get_rotated_image(),
-                                   monster.get_screen_position(self.__map.get_camera_position()))
+                if self.__map.is_on_screen(monster, self.__map.get_camera_position()):
+                    self.__screen.blit(monster.get_rotated_image(),
+                                       monster.get_screen_position(self.__map.get_camera_position()))
 
             """shows bullets, their movement and removal"""
 

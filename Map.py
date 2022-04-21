@@ -181,3 +181,9 @@ class Map:
 
     def __remove_monster(self, monster):
         self.__monsters.remove(monster)
+
+    def is_on_screen(self, sth, camera_position):
+        return 0 < sth.get_screen_position(camera_position).x + sth.get_image().get_size()[0]  \
+               and sth.get_screen_position(camera_position).x < self.__screen_size.x \
+               and 0 < sth.get_screen_position(camera_position).y + sth.get_image().get_size()[1] \
+               and sth.get_screen_position(camera_position).y < self.__screen_size.y
