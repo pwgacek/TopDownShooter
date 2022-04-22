@@ -128,8 +128,8 @@ class Map:
 
     def add_bullet(self):
         self.__hero.set_ammo(self.__hero.get_ammo() - 1)
-        a = self.__hero.get_map_position()[0]
-        b = self.__hero.get_map_position()[1]
+        a = self.__hero.get_map_position().x
+        b = self.__hero.get_map_position().y
 
         x = pygame.math.Vector2(a, b)
         y = self.__hero.get_angle()
@@ -137,7 +137,7 @@ class Map:
             y -= 270
         else:
             y += 90
-        z = self.__screen_size
+        z = self.__hero.get_image().get_size()
         self.__bullets.append(Bullet(x, y, z))
 
     def update_bullets(self, camera_x, camera_y):

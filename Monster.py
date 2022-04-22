@@ -8,7 +8,7 @@ class Monster:
     def __init__(self, map_position):
         self.__map_position = map_position
         self.__angle = 0
-        self.__image = pygame.image.load("assets/monster1.png");
+        self.__image = pygame.image.load("assets/monster1.png")
 
     def __eq__(self, other):
         return self is other

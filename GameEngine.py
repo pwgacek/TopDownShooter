@@ -57,8 +57,6 @@ class GameEngine:
                     if event.key == pygame.K_d:
                         move_direction_flags["right"] = False
 
-            """screen position before hero movement"""
-            prev = self.__map.get_camera_position()
 
             self.__map.move_hero(move_direction_flags, fps*0.1)
             self.__map.move_monsters(fps*0.02)
@@ -79,11 +77,11 @@ class GameEngine:
             """shows bullets, their movement and removal"""
 
             self.__map.show_ammo2(self.__screen)
-            diff = Vector2(camera_position[0]-prev[0], camera_position[1]- prev[1])
-            self.__map.update_bullets(diff[0], diff[1])
 
-            for i in self.__map.get_bullets():
-                self.__screen.blit(i.get_image(), i.get_screen_position())
+            for bullet in self.__map.get_bullets():
+                if self.__map.is_on_screen(bullet, self.__map.get_camera_position()):
+                    self.__screen.blit(bullet.get_image(),
+                                       bullet.get_screen_position(self.__map.get_camera_position()))
 
             self.__map.move_bullets()
             self.__map.remove_bullets()
