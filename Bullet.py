@@ -11,10 +11,9 @@ class Bullet:
         self.__map_position = Vector2(
             map_position.x + hero_size[0]/2 - self.__image.get_size()[0]/2 + math.cos(math.radians(angle-14)) * 50,
             map_position.y + hero_size[1]/2 - self.__image.get_size()[1]/2 - math.sin(math.radians(angle-14)) * 50)
-        self.__screen_position = Vector2(0, 0)
 
     def move(self):
-        """ moves current bullet on both screen and whole map"""
+        """ moves current bullet on  map"""
         speed = 15
         x1 = math.cos(math.radians(self.__angle))
         y1 = math.sin(math.radians(self.__angle))
@@ -23,8 +22,7 @@ class Bullet:
         self.__map_position = Vector2(a, b)
 
     def get_screen_position(self, camera_position):
-        self.__screen_position = Vector2(self.__map_position.x - camera_position.x, self.__map_position.y - camera_position.y)
-        return self.__screen_position
+        return Vector2(self.__map_position.x - camera_position.x, self.__map_position.y - camera_position.y)
 
     def get_map_position(self):
         return self.__map_position
