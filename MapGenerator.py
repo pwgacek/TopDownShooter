@@ -10,12 +10,10 @@ from pygame import Vector2
 
 def __generate_vertexes(no_vertexes, height, width, x_space, y_space):
     """generates [no_vertexes] vertexes of  convex polygon using Valtr algorithm"""
-    print(x_space)
-    print(y_space)
 
     xs = [randint(x_space, width - x_space) for _ in range(no_vertexes)]
     ys = [randint(y_space, height - y_space) for _ in range(no_vertexes)]
-    print(xs)
+
     xs = sorted(xs)
     ys = sorted(ys)
 
@@ -66,57 +64,80 @@ def __generate_vectors_coordinates(coordinates, min_coordinate, max_coordinate):
 
 
 def generate_array(no_vertexes, map_height, map_width, chunk_size, screen_size):
-    polygon = __generate_vertexes(no_vertexes, map_height / chunk_size, map_width / chunk_size, (screen_size.x / chunk_size)/2+3,
-                                  (screen_size.y / chunk_size)/2+3)
-    print(polygon)
+    polygon = __generate_vertexes(no_vertexes, map_height / chunk_size, map_width / chunk_size,
+                                  (screen_size.x / chunk_size) / 2 + 3,
+                                  (screen_size.y / chunk_size) / 2 + 3)
+
     img = Image.new('L', (int(map_width / chunk_size), int(map_height / chunk_size)), 0)
     ImageDraw.Draw(img).polygon(polygon, outline=1, fill=1)
     return np.array(img)
 
 
-# def get_surfaces(chunk_size, screen_size, tree_image):
-#     max_height = int(screen_size.y // chunk_size) + 1
-#     shift = (tree_image.get_size()[0] - chunk_size) / 2
-#     surfaces = list()
-#     print(max_height, shift)
-#     for i in range(1, max_height + 1):
-#         surface_width = tree_image.get_size()[0]
-#         surface_height = i * chunk_size + 2 * shift
-#         print(surface_width, surface_height)
-#
-#         surface = pygame.Surface((surface_width, surface_height), pygame.SRCALPHA)
-#         surface.set_colorkey((0, 0, 0))
-#         for j in range(i):
-#             surface.blit(get_rotated_tree_image(tree_image, i - j), Vector2(0, j * chunk_size - shift))
-#
-#         surfaces.append(surface)
-#
-#     return surfaces
-
-
-def get_rotated_tree_image(tree_image, angle):
+def get_rotated_image(image, angle):
     """ returns rotated  image while keeping its center and size"""
 
-    orig_rect = tree_image.get_rect()
-
-    rot_image = pygame.transform.rotate(tree_image, angle)
+    orig_rect = image.get_rect()
+    rot_image = pygame.transform.rotate(image, angle)
     rot_rect = orig_rect.copy()
     rot_rect.center = rot_image.get_rect().center
     rot_image = rot_image.subsurface(rot_rect).copy()
     return rot_image
 
 
-def generate_background(chunk_size, tree_image, map_size,array):
-    background = pygame.Surface((map_size.x, map_size.y), pygame.SRCALPHA)
-    background.set_colorkey((0, 0, 0))
-    width = int(map_size.x / chunk_size)
-    height = int(map_size.y / chunk_size)
-    print(width,height)
+def generate_background(chunk_size, map_size, screen_size, array):
+    tree_image = pygame.image.load("assets/tree3.png")
+
+    background = [[None for _ in range(int(map_size.y / screen_size.y))] for _ in
+                  range(int(map_size.x / screen_size.x))]
+
     shift = (tree_image.get_size()[0] - chunk_size) / 2
-    for i in range(width):
-        for j in range(height):
-            if array[i][j] == 0:
-                background.blit(pygame.transform.rotate(tree_image,random.randint(0, 359)),
-                                Vector2(i * chunk_size - shift, j * chunk_size - shift))
+    for i in range(int(map_size.x // screen_size.x)):
+        for j in range(int(map_size.y // screen_size.y)):
+            b = pygame.Surface((screen_size.x + 2 * shift, screen_size.y + 2 * shift), pygame.SRCALPHA)
+            # b.set_colorkey((0, 0, 0))
+
+            for k in range(i * int(screen_size.x // chunk_size), (i + 1) * int(screen_size.x // chunk_size)):
+                for l in range(j * int(screen_size.y // chunk_size), (j + 1) * int(screen_size.y // chunk_size)):
+                    if array[k][l] == 0:
+                        if k + 1 == (i + 1) * int(screen_size.x // chunk_size) or \
+                                l + 1 == (j + 1) * int(screen_size.y // chunk_size):
+
+                            b.blit(get_rotated_image(tree_image, randint(0, 359)),
+                                   Vector2((k - i * int(screen_size.x // chunk_size)) * chunk_size - shift,
+                                           (l - j * int(screen_size.y // chunk_size)) * chunk_size - shift))
+
+                        else:
+                            b.blit(get_rotated_image(tree_image, randint(0, 359)),
+                                   Vector2((k - i * int(screen_size.x // chunk_size)) * chunk_size,
+                                           (l - j * int(screen_size.y // chunk_size)) * chunk_size))
+
+            background[i][j] = b
 
     return background
+
+
+def generate_grass(chunk_size, map_size, screen_size, array):
+    grass = list()
+
+    grass.append(pygame.image.load("assets/grass1.png"))
+    grass.append(pygame.image.load("assets/grass2.png"))
+    grass.append(pygame.image.load("assets/grass3.png"))
+
+    grassland = [[None for _ in range(int(map_size.y / screen_size.y))] for _ in range(int(map_size.x / screen_size.x))]
+    for i in range(int(map_size.x // screen_size.x)):
+        for j in range(int(map_size.y // screen_size.y)):
+            g = pygame.Surface((screen_size.x, screen_size.y), pygame.SRCALPHA)
+            # g.set_colorkey((0, 0, 0))
+
+            for k in range(i * int(screen_size.x // chunk_size), (i + 1) * int(screen_size.x // chunk_size)):
+                for l in range(j * int(screen_size.y // chunk_size), (j + 1) * int(screen_size.y // chunk_size)):
+                    if array[k][l] == 1:
+                        r = randint(0, 200)
+                        if r < 3:
+                            g.blit(get_rotated_image(grass[r], randint(0, 359)),
+                                   Vector2((k - i * int(screen_size.x // chunk_size)) * chunk_size,
+                                           (l - j * int(screen_size.y // chunk_size)) * chunk_size))
+
+            grassland[i][j] = g
+
+    return grassland

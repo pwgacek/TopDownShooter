@@ -7,25 +7,26 @@ from pygame.math import Vector2
 from Bullet import Bullet
 from random import randint, random
 
-from MapGenerator import generate_array, generate_background
+from MapGenerator import generate_array, generate_background, generate_grass
 
 
 class Map:
     def __init__(self, screen_size):
-        self.__width = 4000
-        self.__height = 4000
+        self.__size = Vector2(4800, 4800)
         self.__chunk_size = 50
         self.__screen_size = screen_size
-        self.__array = generate_array(30, self.__height, self.__width, self.__chunk_size, self.__screen_size)
-        self.__hero = Hero(Vector2(self.__width / 2, self.__height / 2), self.__screen_size)
+        self.__array = generate_array(30, self.__size.y, self.__size.y, self.__chunk_size, self.__screen_size)
+        self.__hero = Hero(Vector2(self.__size.x / 2, self.__size.y / 2), self.__screen_size)
         self.__bullets = list()
-        self.__font = pygame.font.SysFont('Bradley Hand ITC', 50, bold=pygame.font.Font.bold)
+        # self.__font = pygame.font.SysFont('Bradley Hand ITC', 50, bold=pygame.font.Font.bold)
         self.__monsters = list()
         self.__bullet_image = pygame.image.load("assets/ammo1.png")
-        self.__tree_image = pygame.image.load("assets/tree3.png")
-        self.__background = generate_background(self.__chunk_size, self.__tree_image,
-                                                Vector2(self.__width, self.__height), self.__array)
+        self.__background = generate_background(self.__chunk_size,
+                                                Vector2(self.__size.x, self.__size.y), self.__screen_size, self.__array)
+        self.__grassland = generate_grass(self.__chunk_size,
+                                          Vector2(self.__size.x, self.__size.y), self.__screen_size, self.__array)
         self.__min_no_monsters = 5
+        self.__tree_size = pygame.image.load("assets/tree3.png").get_size()
 
     def move_hero(self, move_direction_flags, move_speed):
         if (move_direction_flags["down"] and move_direction_flags["up"]) or \
@@ -126,8 +127,6 @@ class Map:
         cords = self.__get_cords_in_array(v)
         return self.__array[int(cords.x)][int(cords.y)]
 
-        # return self.__screen_size.x / 2 < x < self.__width - self.__screen_size.x / 2
-
     def get_hero(self):
         return self.__hero
 
@@ -154,7 +153,7 @@ class Map:
                 self.__bullets.remove(i)
 
     def bullet_not_in_bounds(self, bullet):
-        return bullet.get_map_position()[0] > self.__width or bullet.get_map_position()[1] > self.__height or \
+        return bullet.get_map_position()[0] > self.__size.x or bullet.get_map_position()[1] > self.__size.y or \
                bullet.get_map_position()[0] < 0 or bullet.get_map_position()[1] < 0
 
     def get_monsters(self):
@@ -163,27 +162,28 @@ class Map:
     def get_bullets(self):
         return self.__bullets
 
-    def get_font(self):
-        return self.__font
+    # def get_font(self):
+    #     return self.__font
 
     # screen.blit(self.__font.render("Reload (r)", True, (255, 0, 0)), (400, 530))
 
     def add_monster(self):
-        if randint(0, 1):  # if True x = 0 or x = map_width
+        """randomly places monster on the edge of map"""
+        if randint(0, 1):
             if randint(0, 1):
                 x = 0
             else:
-                x = self.__width
+                x = self.__size.x
 
-            y = randint(0, self.__height)
+            y = randint(0, int(self.__size.y))
 
         else:
             if randint(0, 1):
                 y = 0
             else:
-                y = self.__height
+                y = self.__size.y
 
-            x = randint(0, self.__width)
+            x = randint(0, int(self.__size.x))
 
         self.__monsters.append(Monster(Vector2(x, y)))
 
@@ -199,55 +199,14 @@ class Map:
     def __get_cords_in_array(self, v):
         return Vector2(v.x // self.__chunk_size, v.y // self.__chunk_size)
 
-    # def get_array_elements_on_screen(self):
-    #     pos = self.get_camera_position()
-    #
-    #     elements = list()
-    #     for i in range(int(self.__screen_size.x / self.__chunk_size) + 1):
-    #         start_vector = None
-    #         counter = 0
-    #         for j in range(int(self.__screen_size.y / self.__chunk_size) + 1):
-    #             if self.__array[int(self.__get_cords_in_array(pos).x + i)][
-    #                 int(self.__get_cords_in_array(pos).y + j)] == 0:
-    #                 if start_vector is None:
-    #                     start_vector = Vector2(self.__get_cords_in_array(pos).x + i,
-    #                                            self.__get_cords_in_array(pos).y + j)
-    #                 counter += 1
-    #             else:
-    #                 if start_vector is not None:
-    #                     elements.append((start_vector, counter))
-    #                     start_vector = None
-    #                     counter = 0
-    #
-    #         if start_vector is not None:
-    #             elements.append((start_vector, counter))
-    #
-    #             # elements.append(Vector2(self.__get_cords_in_array(pos).x + i, self.__get_cords_in_array(pos).y + j))
-    #
-    #     return elements
-
-    # def get_tree_surface(self, num):
-    #     return self.__tree_surfaces[num - 1]
-
     def get_chunk_size(self):
         return self.__chunk_size
 
-    # def get_rotated_tree_image(self, angle):
-    #     """ returns rotated  image while keeping its center and size"""
-    #
-    #     orig_rect = self.__tree_image.get_rect()
-    #
-    #     rot_image = pygame.transform.rotate(self.__tree_image, angle)
-    #     rot_rect = orig_rect.copy()
-    #     rot_rect.center = rot_image.get_rect().center
-    #     rot_image = rot_image.subsurface(rot_rect).copy()
-    #     return rot_image
-
-    def get_tree_image(self):
-        return self.__tree_image
-
     def get_background(self):
         return self.__background
+
+    def get_grassland(self):
+        return self.__grassland
 
     def get_bullet_image(self):
         return self.__bullet_image
@@ -260,3 +219,6 @@ class Map:
 
     def increase_min_no_monsters(self, num):
         self.__min_no_monsters += num
+
+    def get_tree_size(self):
+        return self.__tree_size
