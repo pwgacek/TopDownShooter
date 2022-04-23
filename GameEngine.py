@@ -18,11 +18,10 @@ class GameEngine:
         running = True
         fps = 60
         fps_clock = pygame.time.Clock()
-
+        monster_clock = pygame.time.Clock()
+        delta = 0
         """set true if key is pressed"""
         move_direction_flags = {"up": False, "down": False, "left": False, "right": False}
-        # for i in range(20):
-        #     self.__map.add_monster()
 
         """main game loop"""
         while running:
@@ -59,46 +58,52 @@ class GameEngine:
                     if event.key == pygame.K_d:
                         move_direction_flags["right"] = False
 
-            self.__map.move_hero(move_direction_flags, fps * 0.1)
-            self.__map.move_monsters(fps * 0.02)
+            """maintain number of monsters """
+            self.__map.keep_no_monsters()
 
-            camera_position = self.__map.get_camera_position()
-
+            """increase number of monsters every 10 seconds"""
+            delta += monster_clock.tick()
+            if delta > 10000:
+                self.__map.increase_min_no_monsters(1)
+                delta = 0
+            """move all map elements"""
+            self.move_map_elements(move_direction_flags, fps)
             """clears screen"""
             self.__screen.fill((0, 102, 0))
-
-            """shows hero on the screen"""
-            self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())
-
-            """shows monsters on the screen"""
-            for monster in self.__map.get_monsters():
-                if self.__map.is_on_screen(monster, self.__map.get_camera_position()):
-                    self.__screen.blit(monster.get_rotated_image(),
-                                       monster.get_screen_position(self.__map.get_camera_position()))
-
-            # """shows map elements on screen"""
-            # for elem in self.__map.get_array_elements_on_screen():
-            #     v, num = elem
-            #     shift = (self.__map.get_tree_image().get_size()[0] - self.__map.get_chunk_size()) / 2
-            #     self.__screen.blit(self.__map.get_tree_surface(num),
-            #                         Vector2(v.x * self.__map.get_chunk_size() - shift - self.__map.get_camera_position().x,
-            #                                 v.y * self.__map.get_chunk_size() - shift - self.__map.get_camera_position().y))
-
-            """shows bullets, their movement and removal"""
-
-            for bullet in self.__map.get_bullets():
-                if self.__map.is_on_screen(bullet, self.__map.get_camera_position()):
-                    self.__screen.blit(bullet.get_image(),
-                                       bullet.get_screen_position(self.__map.get_camera_position()))
-
-            """shows map on the screen"""
-            self.__screen.blit(self.__map.get_background(), Vector2(0, 0),
-                               pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
-
-            self.__map.show_ammo2(self.__screen)
-
-            self.__map.move_bullets()
-            self.__map.remove_bullets()
+            """draws  map elements and ammo """
+            self.draw_map(self.__map.get_camera_position())
 
             pygame.display.update()
             fps_clock.tick(fps)
+
+    def move_map_elements(self, move_direction_flags, fps):
+        self.__map.move_hero(move_direction_flags, fps * 0.1)
+        self.__map.move_monsters(fps * 0.02)
+        self.__map.move_bullets()
+
+    def draw_map(self, camera_position):
+        """shows hero on the screen"""
+        self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())
+
+        """shows monsters on the screen"""
+        for monster in self.__map.get_monsters():
+            if self.__map.is_on_screen(monster, self.__map.get_camera_position()):
+                self.__screen.blit(monster.get_rotated_image(),
+                                   monster.get_screen_position(self.__map.get_camera_position()))
+
+        """shows bullets, their movement and removal"""
+
+        for bullet in self.__map.get_bullets():
+            if self.__map.is_on_screen(bullet, self.__map.get_camera_position()):
+                self.__screen.blit(bullet.get_image(),
+                                   bullet.get_screen_position(self.__map.get_camera_position()))
+
+        """shows map on the screen"""
+        self.__screen.blit(self.__map.get_background(), Vector2(0, 0),
+                           pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
+
+        "show remaining ammo"
+        ammo_shift = 20
+        for i in range(self.__map.get_hero().get_ammo()):
+            self.__screen.blit(self.__map.get_bullet_image(), (ammo_shift, 520))
+            ammo_shift += self.__map.get_bullet_image().get_size()[0]

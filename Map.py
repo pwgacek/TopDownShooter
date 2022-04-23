@@ -7,7 +7,7 @@ from pygame.math import Vector2
 from Bullet import Bullet
 from random import randint, random
 
-from MapGenerator import generate_array,generate_background
+from MapGenerator import generate_array, generate_background
 
 
 class Map:
@@ -23,9 +23,9 @@ class Map:
         self.__monsters = list()
         self.__bullet_image = pygame.image.load("assets/ammo1.png")
         self.__tree_image = pygame.image.load("assets/tree3.png")
-        # self.__tree_surfaces = get_surfaces(self.__chunk_size, self.__screen_size, self.__tree_image)
         self.__background = generate_background(self.__chunk_size, self.__tree_image,
                                                 Vector2(self.__width, self.__height), self.__array)
+        self.__min_no_monsters = 5
 
     def move_hero(self, move_direction_flags, move_speed):
         if (move_direction_flags["down"] and move_direction_flags["up"]) or \
@@ -126,7 +126,7 @@ class Map:
         cords = self.__get_cords_in_array(v)
         return self.__array[int(cords.x)][int(cords.y)]
 
-        #return self.__screen_size.x / 2 < x < self.__width - self.__screen_size.x / 2
+        # return self.__screen_size.x / 2 < x < self.__width - self.__screen_size.x / 2
 
     def get_hero(self):
         return self.__hero
@@ -136,22 +136,17 @@ class Map:
         a = self.__hero.get_map_position().x
         b = self.__hero.get_map_position().y
 
-        x = pygame.math.Vector2(a, b)
-        y = self.__hero.get_angle()
-        if y >= 270:
-            y -= 270
-        else:
-            y += 90
-        z = self.__hero.get_image().get_size()
-        self.__bullets.append(Bullet(x, y, z))
+        map_position = Vector2(a, b)
+        angle = self.__hero.get_angle() + 90
 
-    def update_bullets(self, camera_x, camera_y):
-        for i in self.__bullets:
-            i.update_screen_pos(camera_x, camera_y)
+        hero_size = self.__hero.get_image().get_size()
+        self.__bullets.append(Bullet(map_position, angle, hero_size))
 
     def move_bullets(self):
-        for i in self.__bullets:
-            i.move()
+        for bullet in self.__bullets:
+            bullet.move()
+
+        self.remove_bullets()
 
     def remove_bullets(self):
         for i in self.__bullets:
@@ -171,17 +166,25 @@ class Map:
     def get_font(self):
         return self.__font
 
-    def show_ammo2(self, screen):
-        x = 20
-        for i in range(self.__hero.get_ammo()):
-            screen.blit(self.__bullet_image, (x, 520))
-            x += self.__bullet_image.get_size()[0]
-
     # screen.blit(self.__font.render("Reload (r)", True, (255, 0, 0)), (400, 530))
 
     def add_monster(self):
-        x = randint(0, self.__width)
-        y = randint(0, self.__height)
+        if randint(0, 1):  # if True x = 0 or x = map_width
+            if randint(0, 1):
+                x = 0
+            else:
+                x = self.__width
+
+            y = randint(0, self.__height)
+
+        else:
+            if randint(0, 1):
+                y = 0
+            else:
+                y = self.__height
+
+            x = randint(0, self.__width)
+
         self.__monsters.append(Monster(Vector2(x, y)))
 
     def __remove_monster(self, monster):
@@ -245,3 +248,15 @@ class Map:
 
     def get_background(self):
         return self.__background
+
+    def get_bullet_image(self):
+        return self.__bullet_image
+
+    def keep_no_monsters(self):
+        no_needed_monsters = self.__min_no_monsters - len(self.__monsters)
+        if no_needed_monsters > 0:
+            for i in range(no_needed_monsters):
+                self.add_monster()
+
+    def increase_min_no_monsters(self, num):
+        self.__min_no_monsters += num
