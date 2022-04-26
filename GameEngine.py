@@ -95,7 +95,8 @@ class GameEngine:
         arr_y = int(self.__map.get_camera_position().y // self.__height)
 
         self.__screen.blit(self.__map.get_grassland()[arr_x][arr_y], Vector2(0, 0),
-                           pygame.Rect(screen_shift_x, screen_shift_y, self.__width - screen_shift_x, self.__height - screen_shift_y))
+                           pygame.Rect(screen_shift_x, screen_shift_y, self.__width - screen_shift_x,
+                                       self.__height - screen_shift_y))
         self.__screen.blit(self.__map.get_grassland()[arr_x + 1][arr_y], Vector2(self.__width - screen_shift_x, 0),
                            pygame.Rect(0, screen_shift_y, screen_shift_x, self.__height - screen_shift_y))
         self.__screen.blit(self.__map.get_grassland()[arr_x][arr_y + 1], Vector2(0, self.__height - screen_shift_y),
@@ -122,13 +123,19 @@ class GameEngine:
 
         """shows map on the screen"""
         self.__screen.blit(self.__map.get_background()[arr_x][arr_y], Vector2(-shift, -shift),
-                           pygame.Rect(screen_shift_x, screen_shift_y, self.__width -screen_shift_x + shift, self.__height - screen_shift_y +shift))
-        self.__screen.blit(self.__map.get_background()[arr_x+1][arr_y], Vector2(self.__width-screen_shift_x-shift,-shift),
-                           pygame.Rect(0, screen_shift_y, screen_shift_x + shift, self.__height - screen_shift_y +shift))
-        self.__screen.blit(self.__map.get_background()[arr_x][arr_y+1], Vector2(-shift, self.__height-screen_shift_y-shift),
-                           pygame.Rect(screen_shift_x, 0, self.__width -screen_shift_x + shift, screen_shift_y + shift))
-        self.__screen.blit(self.__map.get_background()[arr_x+1][arr_y+1], Vector2(self.__width - screen_shift_x - shift,
-                                                                                  self.__height - screen_shift_y - shift),
+                           pygame.Rect(screen_shift_x, screen_shift_y, self.__width - screen_shift_x + shift,
+                                       self.__height - screen_shift_y + shift))
+        self.__screen.blit(self.__map.get_background()[arr_x + 1][arr_y],
+                           Vector2(self.__width - screen_shift_x - shift, -shift),
+                           pygame.Rect(0, screen_shift_y, screen_shift_x + shift,
+                                       self.__height - screen_shift_y + shift))
+        self.__screen.blit(self.__map.get_background()[arr_x][arr_y + 1],
+                           Vector2(-shift, self.__height - screen_shift_y - shift),
+                           pygame.Rect(screen_shift_x, 0, self.__width - screen_shift_x + shift,
+                                       screen_shift_y + shift))
+        self.__screen.blit(self.__map.get_background()[arr_x + 1][arr_y + 1],
+                           Vector2(self.__width - screen_shift_x - shift,
+                                   self.__height - screen_shift_y - shift),
                            pygame.Rect(0, 0, screen_shift_x + shift, screen_shift_y + shift))
         "show remaining ammo"
         ammo_shift = 20
