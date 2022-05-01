@@ -22,9 +22,9 @@ class Map:
         self.__monsters = list()
         self.__bullet_image = pygame.image.load("assets/ammo1.png")
         self.__background = generate_background(self.__chunk_size,
-                                                Vector2(self.__size.x, self.__size.y), self.__screen_size, self.__array)
+                                                Vector2(self.__size.x, self.__size.y), self.__array)
         self.__grassland = generate_grass(self.__chunk_size,
-                                          Vector2(self.__size.x, self.__size.y), self.__screen_size, self.__array)
+                                          Vector2(self.__size.x, self.__size.y), self.__array)
         self.__min_no_monsters = 5
         self.__tree_size = pygame.image.load("assets/tree3.png").get_size()
 
