@@ -13,6 +13,8 @@ class Hero:
         self.__screen_position = Vector2(screen_size.x / 2 - self.__image.get_size()[0] / 2,
                                          screen_size.y / 2 - self.__image.get_size()[1] / 2)
         self.__bullets = 8
+        self.__max_hp = 5
+        self.__hp = 5
 
     def set_angle(self):
         """sets value of self.__angle in accordance with mouse position"""
@@ -52,3 +54,12 @@ class Hero:
 
     def set_ammo(self, x):
         self.__bullets = x
+
+    def hurt(self):
+        self.__hp -= 1
+
+    def get_hp(self):
+        return self.__hp
+
+    def get_max_hp(self):
+        return self.__max_hp

@@ -6,6 +6,7 @@ from Monster import Monster
 from pygame.math import Vector2
 from Bullet import Bullet
 from random import randint, random
+from time import time
 
 from MapGenerator import generate_array, generate_background, generate_grass
 
@@ -27,6 +28,7 @@ class Map:
                                           Vector2(self.__size.x, self.__size.y), self.__screen_size, self.__array)
         self.__min_no_monsters = 5
         self.__tree_size = pygame.image.load("assets/tree3.png").get_size()
+        self.__score = 0
 
     def move_hero(self, move_direction_flags, move_speed):
         if (move_direction_flags["down"] and move_direction_flags["up"]) or \
@@ -64,11 +66,20 @@ class Map:
         self.__hero.set_angle()
 
     def move_monsters(self, move_speed):
-
+        tmp = move_speed
+        slower = move_speed*0.3
+        monster_freeze_time = 1
         max_distance = self.__hero.get_image().get_size()[1] / 2
         for monster in self.__monsters:
             if math.dist(monster.get_map_position(), self.__hero.get_map_position()) > max_distance:
 
+                if(monster.get_time() != 0):
+                    if monster.get_time() + monster_freeze_time > time():
+                        move_speed = slower
+                    else:
+                        monster.set_time()
+                else:
+                    move_speed = tmp
                 x = monster.get_map_position().x + monster.get_unit_vector().x * move_speed
                 y = monster.get_map_position().y + monster.get_unit_vector().y * move_speed
 
@@ -222,3 +233,45 @@ class Map:
 
     def get_tree_size(self):
         return self.__tree_size
+
+    def score_point(self):
+        self.__score += 1
+
+    def get_score(self):
+        return self.__score
+
+    def check_collisions(self):
+        rect = pygame.Rect(self.__hero.get_map_position()[0], self.__hero.get_map_position()[1],
+                           self.__hero.get_image().get_width(), self.__hero.get_image().get_height())
+        for bullet in self.__bullets:
+            for monster in self.__monsters:
+
+                rect1 = pygame.Rect(bullet.get_map_position()[0], bullet.get_map_position()[1],
+                                    bullet.get_image().get_width(),bullet.get_image().get_height())
+                rect2 = pygame.Rect(monster.get_map_position()[0], monster.get_map_position()[1],
+                                    monster.get_image().get_width(),monster.get_image().get_height())
+                if pygame.Rect.colliderect(rect1, rect2):
+                    self.__bullets.remove(bullet)
+                    not_remove = monster.shot(time())
+                    if(not not_remove):
+                        self.__monsters.remove(monster)
+                        self.score_point()
+                    break
+
+        monster_attack_speed = 1
+
+        for monster in self.__monsters:
+            rect2 = pygame.Rect(monster.get_map_position()[0], monster.get_map_position()[1],
+                                monster.get_image().get_width(), monster.get_image().get_height())
+
+            if pygame.Rect.colliderect(rect, rect2):
+                if monster.get_last_attack() == 0 or monster.get_last_attack()+ monster_attack_speed< time():
+                    monster.attack()
+                    self.__hero.hurt()
+                    if self.__hero.get_hp() == 0:
+                        return False
+
+        return True
+
+
+

@@ -2,6 +2,7 @@ import math
 
 import pygame
 from pygame.math import Vector2
+from time import time
 
 
 class Monster:
@@ -9,6 +10,9 @@ class Monster:
         self.__map_position = map_position
         self.__angle = 0
         self.__image = pygame.image.load("assets/monster1.png")
+        self.__hp = 3
+        self.__shot_time = 0
+        self.__last_attack = 0
 
     def __eq__(self, other):
         return self is other
@@ -57,3 +61,19 @@ class Monster:
             if my_center[0] < hero_center[0]:
                 self.__angle = 360.0 - self.__angle
 
+    def shot(self, time):
+        self.__shot_time = time
+        self.__hp -= 1
+        return self.__hp
+
+    def get_time(self):
+        return self.__shot_time
+
+    def set_time(self):
+        self.__shot_time = 0
+
+    def attack(self):
+        self.__last_attack = time()
+
+    def get_last_attack(self):
+        return self.__last_attack

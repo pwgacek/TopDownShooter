@@ -12,6 +12,7 @@ class GameEngine:
         self.__height = 600
         self.__screen = pygame.display.set_mode((self.__width, self.__height))
         self.__map = Map(Vector2(self.__screen.get_size()))
+        self.__font = pygame.font.SysFont('arial', 32, bold = pygame.font.Font.bold)
         pygame.display.set_caption("Top-Down Shooter")
 
     def run(self):
@@ -68,6 +69,7 @@ class GameEngine:
                 delta = 0
             """move all map elements"""
             self.move_map_elements(move_direction_flags, fps)
+            running = self.__map.check_collisions()
             """clears screen"""
             self.__screen.fill((0, 102, 0))
             """draws  map elements and ammo """
@@ -75,6 +77,11 @@ class GameEngine:
 
             pygame.display.update()
             fps_clock.tick(fps)
+
+
+        "reset game"
+        self.set_map(Map(Vector2(self.__screen.get_size())))
+        self.run()
 
     def move_map_elements(self, move_direction_flags, fps):
         self.__map.move_hero(move_direction_flags, fps * 0.1)
@@ -137,8 +144,22 @@ class GameEngine:
                            Vector2(self.__width - screen_shift_x - shift,
                                    self.__height - screen_shift_y - shift),
                            pygame.Rect(0, 0, screen_shift_x + shift, screen_shift_y + shift))
+
+        "draw hero health"
+        pygame.draw.rect(self.__screen, (0, 255, 0), (20, 20, self.__map.get_hero().get_max_hp()*35, 20))
+        pygame.draw.rect(self.__screen, (255, 0, 0), (20, 20, self.__map.get_hero().get_hp() * 35, 20))
+
         "show remaining ammo"
         ammo_shift = 20
         for i in range(self.__map.get_hero().get_ammo()):
             self.__screen.blit(self.__map.get_bullet_image(), (ammo_shift, 520))
             ammo_shift += self.__map.get_bullet_image().get_size()[0]
+
+        "show score"
+        score = self.__font.render("Score " + str(self.__map.get_score()) , True, (255, 255, 255))
+        self.__screen.blit(score, (640, 10))
+
+    def set_map(self, map):
+        self.__map = map
+
+
