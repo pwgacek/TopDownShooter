@@ -84,60 +84,38 @@ def get_rotated_image(image, angle):
     return rot_image
 
 
-def generate_background(chunk_size, map_size, screen_size, array):
+def generate_background(chunk_size, map_size, array):
     tree_image = pygame.image.load("assets/tree3.png")
-
-    background = [[None for _ in range(int(map_size.y / screen_size.y))] for _ in
-                  range(int(map_size.x / screen_size.x))]
+    background = pygame.Surface((map_size.x, map_size.y), pygame.SRCALPHA)
+    width = int(map_size.x / chunk_size)
+    height = int(map_size.y / chunk_size)
 
     shift = (tree_image.get_size()[0] - chunk_size) / 2
-    for i in range(int(map_size.x // screen_size.x)):
-        for j in range(int(map_size.y // screen_size.y)):
-            b = pygame.Surface((screen_size.x + 2 * shift, screen_size.y + 2 * shift), pygame.SRCALPHA)
-            # b.set_colorkey((0, 0, 0))
-
-            for k in range(i * int(screen_size.x // chunk_size), (i + 1) * int(screen_size.x // chunk_size)):
-                for l in range(j * int(screen_size.y // chunk_size), (j + 1) * int(screen_size.y // chunk_size)):
-                    if array[k][l] == 0:
-                        if k + 1 == (i + 1) * int(screen_size.x // chunk_size) or \
-                                l + 1 == (j + 1) * int(screen_size.y // chunk_size):
-
-                            b.blit(get_rotated_image(tree_image, randint(0, 359)),
-                                   Vector2((k - i * int(screen_size.x // chunk_size)) * chunk_size - shift,
-                                           (l - j * int(screen_size.y // chunk_size)) * chunk_size - shift))
-
-                        else:
-                            b.blit(get_rotated_image(tree_image, randint(0, 359)),
-                                   Vector2((k - i * int(screen_size.x // chunk_size)) * chunk_size,
-                                           (l - j * int(screen_size.y // chunk_size)) * chunk_size))
-
-            background[i][j] = b
+    for i in range(width):
+        for j in range(height):
+            if array[i][j] == 0:
+                background.blit(get_rotated_image(tree_image, random.randint(0, 359)),
+                                Vector2(i * chunk_size - shift, j * chunk_size - shift))
 
     return background
 
 
-def generate_grass(chunk_size, map_size, screen_size, array):
+def generate_grass(chunk_size, map_size, array):
     grass = list()
-
     grass.append(pygame.image.load("assets/grass1.png"))
     grass.append(pygame.image.load("assets/grass2.png"))
     grass.append(pygame.image.load("assets/grass3.png"))
 
-    grassland = [[None for _ in range(int(map_size.y / screen_size.y))] for _ in range(int(map_size.x / screen_size.x))]
-    for i in range(int(map_size.x // screen_size.x)):
-        for j in range(int(map_size.y // screen_size.y)):
-            g = pygame.Surface((screen_size.x, screen_size.y), pygame.SRCALPHA)
-            # g.set_colorkey((0, 0, 0))
-
-            for k in range(i * int(screen_size.x // chunk_size), (i + 1) * int(screen_size.x // chunk_size)):
-                for l in range(j * int(screen_size.y // chunk_size), (j + 1) * int(screen_size.y // chunk_size)):
-                    if array[k][l] == 1:
-                        r = randint(0, 200)
-                        if r < 3:
-                            g.blit(get_rotated_image(grass[r], randint(0, 359)),
-                                   Vector2((k - i * int(screen_size.x // chunk_size)) * chunk_size,
-                                           (l - j * int(screen_size.y // chunk_size)) * chunk_size))
-
-            grassland[i][j] = g
+    grassland = pygame.Surface((map_size.x, map_size.y), pygame.SRCALPHA)
+    width = int(map_size.x / chunk_size)
+    height = int(map_size.y / chunk_size)
+    # print(width, height)
+    for i in range(width):
+        for j in range(height):
+            if array[i][j] == 1:
+                k = randint(0, 150)
+                if k < 3:
+                    grassland.blit(get_rotated_image(grass[k], random.randint(0, 359)),
+                                   Vector2(i * chunk_size, j * chunk_size))
 
     return grassland

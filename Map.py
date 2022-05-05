@@ -25,9 +25,9 @@ class Map:
         self.__reload = pygame.image.load("assets/reload.png")
         self.__reload_angle = 0
         self.__background = generate_background(self.__chunk_size,
-                                                Vector2(self.__size.x, self.__size.y), self.__screen_size, self.__array)
+                                                Vector2(self.__size.x, self.__size.y), self.__array)
         self.__grassland = generate_grass(self.__chunk_size,
-                                          Vector2(self.__size.x, self.__size.y), self.__screen_size, self.__array)
+                                          Vector2(self.__size.x, self.__size.y), self.__array)
         self.__min_no_monsters = 5
         self.__tree_size = pygame.image.load("assets/tree3.png").get_size()
         self.__score = 0
@@ -288,5 +288,4 @@ class Map:
         rot_image = rot_image.subsurface(rot_rect).copy()
         self.__reload_angle += -5
         return rot_image
-
 
