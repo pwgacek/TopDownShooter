@@ -3,6 +3,7 @@ import random
 import pygame
 from Map import Map
 from pygame.math import Vector2
+from time import time
 
 
 class GameEngine:
@@ -17,15 +18,17 @@ class GameEngine:
 
     def run(self):
         running = True
+        running2 = True
         fps = 60
         fps_clock = pygame.time.Clock()
         monster_clock = pygame.time.Clock()
         delta = 0
+        reload_time  = 0
         """set true if key is pressed"""
         move_direction_flags = {"up": False, "down": False, "left": False, "right": False}
 
         """main game loop"""
-        while running:
+        while running and running2:
 
             for event in pygame.event.get():
 
@@ -38,7 +41,7 @@ class GameEngine:
                 if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_r:
-                        self.__map.get_hero().set_ammo(8)
+                        reload_time = time()
 
                     if event.key == pygame.K_w:
                         move_direction_flags["up"] = True
@@ -69,18 +72,30 @@ class GameEngine:
                 delta = 0
             """move all map elements"""
             self.move_map_elements(move_direction_flags, fps)
-            running = self.__map.check_collisions()
+            running2 = self.__map.check_collisions()
             """clears screen"""
             self.__screen.fill((0, 102, 0))
             """draws  map elements and ammo """
-            self.draw_map(self.__map.get_camera_position())
+            reload_time = self.draw_map(self.__map.get_camera_position(), reload_time)
 
+            pygame.display.update()
+            fps_clock.tick(fps)
+
+        """clear map"""
+        self.set_map(Map(Vector2(self.__screen.get_size())))
+        dead = True
+
+        while dead:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    dead = False
+
+            self.__screen.fill((0,0,0))
             pygame.display.update()
             fps_clock.tick(fps)
 
 
         "reset game"
-        self.set_map(Map(Vector2(self.__screen.get_size())))
         self.run()
 
     def move_map_elements(self, move_direction_flags, fps):
@@ -88,7 +103,7 @@ class GameEngine:
         self.__map.move_monsters(fps * 0.02)
         self.__map.move_bullets()
 
-    def draw_map(self, camera_position):
+    def draw_map(self, camera_position, reload_time):
         shift = (self.__map.get_tree_size()[0] - self.__map.get_chunk_size()) // 2
 
         screen_shift_x = camera_position.x - int(
@@ -158,6 +173,15 @@ class GameEngine:
         "show score"
         score = self.__font.render("Score " + str(self.__map.get_score()) , True, (255, 255, 255))
         self.__screen.blit(score, (640, 10))
+
+        "show reloading img"
+        if (reload_time != 0 and reload_time + 1 < time()):
+            self.__map.get_hero().set_ammo(8)
+            reload_time = 0
+        elif reload_time != 0 and reload_time + 1 > time():
+            self.__screen.blit(self.__map.get_rotated_image(), (370, 529))
+
+        return reload_time
 
     def set_map(self, map):
         self.__map = map

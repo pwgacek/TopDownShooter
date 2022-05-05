@@ -22,6 +22,8 @@ class Map:
         # self.__font = pygame.font.SysFont('Bradley Hand ITC', 50, bold=pygame.font.Font.bold)
         self.__monsters = list()
         self.__bullet_image = pygame.image.load("assets/ammo1.png")
+        self.__reload = pygame.image.load("assets/reload.png")
+        self.__reload_angle = 0
         self.__background = generate_background(self.__chunk_size,
                                                 Vector2(self.__size.x, self.__size.y), self.__screen_size, self.__array)
         self.__grassland = generate_grass(self.__chunk_size,
@@ -273,5 +275,18 @@ class Map:
 
         return True
 
+    def get_reload_icon(self):
+        return self.__reload
+
+    def get_rotated_image(self):
+        """ returns rotated  image while keeping its center and size"""
+
+        orig_rect = self.__reload.get_rect()
+        rot_image = pygame.transform.rotate(self.__reload, self.__reload_angle)
+        rot_rect = orig_rect.copy()
+        rot_rect.center = rot_image.get_rect().center
+        rot_image = rot_image.subsurface(rot_rect).copy()
+        self.__reload_angle += -5
+        return rot_image
 
 
