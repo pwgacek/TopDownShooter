@@ -1,9 +1,9 @@
-import random
+from time import time
 
 import pygame
-from Map import Map
 from pygame.math import Vector2
-from time import time
+
+from Map import Map
 
 
 class GameEngine:
@@ -13,17 +13,19 @@ class GameEngine:
         self.__height = 600
         self.__screen = pygame.display.set_mode((self.__width, self.__height))
         self.__map = Map(Vector2(self.__screen.get_size()))
-        self.__font = pygame.font.SysFont('arial', 32, bold = pygame.font.Font.bold)
+        self.__font = pygame.font.SysFont('arial', 32, bold=pygame.font.Font.bold)
         pygame.display.set_caption("Top-Down Shooter")
 
     def run(self):
         running = True
         running2 = True
+        dead = True
         fps = 60
         fps_clock = pygame.time.Clock()
         monster_clock = pygame.time.Clock()
+        self.set_map(Map(Vector2(self.__screen.get_size())))
         delta = 0
-        reload_time  = 0
+        reload_time = 0
         """set true if key is pressed"""
         move_direction_flags = {"up": False, "down": False, "left": False, "right": False}
 
@@ -34,6 +36,7 @@ class GameEngine:
 
                 if event.type == pygame.QUIT:
                     running = False
+                    dead = False
 
                 if event.type == pygame.MOUSEBUTTONDOWN and self.__map.get_hero().get_ammo() > 0:
                     self.__map.add_bullet()
@@ -81,22 +84,32 @@ class GameEngine:
             pygame.display.update()
             fps_clock.tick(fps)
 
-        """clear map"""
-        self.set_map(Map(Vector2(self.__screen.get_size())))
-        dead = True
+        """Game Over manu"""
+        click = False
 
         while dead:
+            self.__screen.fill((0, 0, 0))
+
+            mx, my = pygame.mouse.get_pos()
+
+            new_game = pygame.Rect(290, 400, 200, 50)
+            if new_game.collidepoint((mx, my)):
+                if click:
+                    self.run()
+                    break
+
+            self.game_over_screen(new_game)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     dead = False
 
-            self.__screen.fill((0,0,0))
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        click = True
+
             pygame.display.update()
             fps_clock.tick(fps)
-
-
-        "reset game"
-        self.run()
 
     def move_map_elements(self, move_direction_flags, fps):
         self.__map.move_hero(move_direction_flags, fps * 0.1)
@@ -104,12 +117,6 @@ class GameEngine:
         self.__map.move_bullets()
 
     def draw_map(self, camera_position, reload_time):
-        shift = (self.__map.get_tree_size()[0] - self.__map.get_chunk_size()) // 2
-
-        screen_shift_x = camera_position.x - int(
-            self.__map.get_camera_position().x // self.__width) * self.__width
-        screen_shift_y = camera_position.y - int(
-            self.__map.get_camera_position().y // self.__height) * self.__height
 
         """show grass"""
         self.__screen.blit(self.__map.get_grassland(), Vector2(0, 0),
@@ -136,8 +143,8 @@ class GameEngine:
                            pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
 
         "draw hero health"
-        pygame.draw.rect(self.__screen, (0, 255, 0), (20, 20, self.__map.get_hero().get_max_hp()*35, 20))
-        pygame.draw.rect(self.__screen, (255, 0, 0), (20, 20, self.__map.get_hero().get_hp() * 35, 20))
+        pygame.draw.rect(self.__screen, (255, 0, 0), (20, 20, self.__map.get_hero().get_max_hp() * 35, 20))
+        pygame.draw.rect(self.__screen, (0, 255, 0), (20, 20, self.__map.get_hero().get_hp() * 35, 20))
 
         "show remaining ammo"
         ammo_shift = 20
@@ -146,11 +153,11 @@ class GameEngine:
             ammo_shift += self.__map.get_bullet_image().get_size()[0]
 
         "show score"
-        score = self.__font.render("Score " + str(self.__map.get_score()) , True, (255, 255, 255))
+        score = self.__font.render("Score " + str(self.__map.get_score()), True, (255, 255, 255))
         self.__screen.blit(score, (640, 10))
 
         "show reloading img"
-        if (reload_time != 0 and reload_time + 1 < time()):
+        if reload_time != 0 and reload_time + 1 < time():
             self.__map.get_hero().set_ammo(8)
             reload_time = 0
         elif reload_time != 0 and reload_time + 1 > time():
@@ -158,7 +165,15 @@ class GameEngine:
 
         return reload_time
 
-    def set_map(self, map):
-        self.__map = map
+    def set_map(self, map1):
+        self.__map = map1
 
-
+    def game_over_screen(self, button1):
+        over = pygame.font.SysFont('arial', 80, bold=pygame.font.Font.bold).render("Game Over", True, (255, 255, 255))
+        self.__screen.blit(over, (190, 100))
+        score = pygame.font.SysFont('arial', 40).render("Your score " + str(self.__map.get_score()),
+                                                        True, (255, 255, 255))
+        self.__screen.blit(score, (300, 250))
+        pygame.draw.rect(self.__screen, (255, 0, 0), button1)
+        play = pygame.font.SysFont('arial', 30).render("Play Again", True, (255, 255, 255))
+        self.__screen.blit(play, (330, 405))

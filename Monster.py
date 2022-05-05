@@ -61,8 +61,8 @@ class Monster:
             if my_center[0] < hero_center[0]:
                 self.__angle = 360.0 - self.__angle
 
-    def shot(self, time):
-        self.__shot_time = time
+    def shot(self, time1):
+        self.__shot_time = time1
         self.__hp -= 1
         return self.__hp
 

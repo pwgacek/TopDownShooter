@@ -14,12 +14,12 @@ class Hero:
                                          screen_size.y / 2 - self.__image.get_size()[1] / 2)
         self.__bullets = 8
         self.__max_hp = 5
-        self.__hp = 1
+        self.__hp = 5
 
     def set_angle(self):
         """sets value of self.__angle in accordance with mouse position"""
 
-        center = self.__screen_position.x + self.__image.get_size()[0] / 2,\
+        center = self.__screen_position.x + self.__image.get_size()[0] / 2, \
                  self.__screen_position.y + self.__image.get_size()[1] / 2
         distance = math.dist(pygame.mouse.get_pos(), center)
         if distance > 1:
