@@ -18,33 +18,38 @@ class GameEngine:
 
     def run(self):
         running = True
-        running2 = True
-        dead = True
+        hero_alive = True
+        game_over = True
         fps = 60
         fps_clock = pygame.time.Clock()
         monster_clock = pygame.time.Clock()
         self.set_map(Map(Vector2(self.__screen.get_size())))
         delta = 0
-        reload_time = 0
         """set true if key is pressed"""
         move_direction_flags = {"up": False, "down": False, "left": False, "right": False}
 
         """main game loop"""
-        while running and running2:
+        while running and hero_alive:
 
             for event in pygame.event.get():
 
                 if event.type == pygame.QUIT:
                     running = False
-                    dead = False
+                    game_over = False
 
-                if event.type == pygame.MOUSEBUTTONDOWN and self.__map.get_hero().get_ammo() > 0:
-                    self.__map.add_bullet()
+                if event.type == pygame.MOUSEBUTTONDOWN and self.__map.get_hero().get_ammo() > 0 \
+                        and self.__map.get_reload_time() == 0:
+                    """can choot with all mouse buttons"""
+                    # self.__map.add_bullet()
+
+                    """shoot only with left button"""
+                    if event.button == 1:
+                        self.__map.add_bullet()
 
                 if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_r:
-                        reload_time = time()
+                        self.__map.set_reload_time(time())
 
                     if event.key == pygame.K_w:
                         move_direction_flags["up"] = True
@@ -75,11 +80,11 @@ class GameEngine:
                 delta = 0
             """move all map elements"""
             self.move_map_elements(move_direction_flags, fps)
-            running2 = self.__map.check_collisions()
+            hero_alive = self.__map.check_collisions()
             """clears screen"""
             self.__screen.fill((0, 102, 0))
             """draws  map elements and ammo """
-            reload_time = self.draw_map(self.__map.get_camera_position(), reload_time)
+            self.draw_map(self.__map.get_camera_position())
 
             pygame.display.update()
             fps_clock.tick(fps)
@@ -87,7 +92,7 @@ class GameEngine:
         """Game Over manu"""
         click = False
 
-        while dead:
+        while game_over:
             self.__screen.fill((0, 0, 0))
 
             mx, my = pygame.mouse.get_pos()
@@ -102,7 +107,7 @@ class GameEngine:
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    dead = False
+                    game_over = False
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
@@ -116,7 +121,7 @@ class GameEngine:
         self.__map.move_monsters(fps * 0.02)
         self.__map.move_bullets()
 
-    def draw_map(self, camera_position, reload_time):
+    def draw_map(self, camera_position):
 
         """show grass"""
         self.__screen.blit(self.__map.get_grassland(), Vector2(0, 0),
@@ -157,13 +162,11 @@ class GameEngine:
         self.__screen.blit(score, (640, 10))
 
         "show reloading img"
-        if reload_time != 0 and reload_time + 1 < time():
+        if self.__map.get_reload_time() != 0 and self.__map.get_reload_time() + 1 < time():
             self.__map.get_hero().set_ammo(8)
-            reload_time = 0
-        elif reload_time != 0 and reload_time + 1 > time():
+            self.__map.set_reload_time(0)
+        elif self.__map.get_reload_time() != 0 and self.__map.get_reload_time() + 1 > time():
             self.__screen.blit(self.__map.get_rotated_image(), (370, 529))
-
-        return reload_time
 
     def set_map(self, map1):
         self.__map = map1

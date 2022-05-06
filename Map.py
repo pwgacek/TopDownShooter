@@ -24,6 +24,7 @@ class Map:
         self.__bullet_image = pygame.image.load("assets/ammo1.png")
         self.__reload = pygame.image.load("assets/reload.png")
         self.__reload_angle = 0
+        self.__reload_time = 0
         self.__background = generate_background(self.__chunk_size,
                                                 Vector2(self.__size.x, self.__size.y), self.__array)
         self.__grassland = generate_grass(self.__chunk_size,
@@ -298,3 +299,9 @@ class Map:
         rot_image = rot_image.subsurface(rot_rect).copy()
         self.__reload_angle += -5
         return rot_image
+
+    def get_reload_time(self):
+        return self.__reload_time
+
+    def set_reload_time(self, time1):
+        self.__reload_time = time1
