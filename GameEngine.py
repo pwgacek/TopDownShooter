@@ -39,7 +39,7 @@ class GameEngine:
 
                 if event.type == pygame.MOUSEBUTTONDOWN and self.__map.get_hero().get_ammo() > 0 \
                         and self.__map.get_reload_time() == 0:
-                    """can choot with all mouse buttons"""
+                    """can shoot with all mouse buttons"""
                     # self.__map.add_bullet()
 
                     """shoot only with left button"""

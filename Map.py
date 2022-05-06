@@ -256,15 +256,15 @@ class Map:
 
     def check_collisions(self):
         bull_h = 0
-        monst_h = 0
+        monster_h = 0
         hero_h = self.__hero.get_image().get_height()*2/5
         if len(self.__bullets) > 0:
             bull_h = self.__bullets[0].get_image().get_height()*2/5
         if len(self.__monsters) > 0:
-            monst_h = self.__monsters[0].get_image().get_height()*2/5
+            monster_h = self.__monsters[0].get_image().get_height()*2/5
         for bullet in self.__bullets:
             for monster in self.__monsters:
-                if self.distance(monster, bullet) < bull_h + monst_h:
+                if self.distance(monster, bullet) < bull_h + monster_h:
                     self.__bullets.remove(bullet)
                     not_remove = monster.shot(time())
                     if not not_remove:
@@ -275,7 +275,7 @@ class Map:
         monster_attack_speed = 1
 
         for monster in self.__monsters:
-            if self.distance(self.__hero, monster) < monst_h + hero_h:
+            if self.distance(self.__hero, monster) < monster_h + hero_h:
                 if monster.get_last_attack() == 0 or monster.get_last_attack() + monster_attack_speed < time():
                     monster.attack()
                     self.__hero.hurt()
