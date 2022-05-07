@@ -7,7 +7,7 @@ from pygame.math import Vector2
 
 from Bullet import Bullet
 from Hero import Hero
-from MapGenerator import generate_array, generate_background, generate_grass
+from MapGenerator import generate_array, generate_borders, generate_grass, generate_map_elements
 from Monster import Monster
 
 
@@ -25,10 +25,12 @@ class Map:
         self.__reload = pygame.image.load("assets/reload.png")
         self.__reload_angle = 0
         self.__reload_time = 0
-        self.__background = generate_background(self.__chunk_size,
-                                                Vector2(self.__size.x, self.__size.y), self.__array)
+        self.__borders = generate_borders(self.__chunk_size,
+                                             Vector2(self.__size.x, self.__size.y), self.__array)
         self.__grassland = generate_grass(self.__chunk_size,
                                           Vector2(self.__size.x, self.__size.y), self.__array)
+        self.__map_elements = generate_map_elements(self.__chunk_size,
+                                                    Vector2(self.__size.x, self.__size.y), self.__array)
         self.__min_no_monsters = 5
         self.__tree_size = pygame.image.load("assets/tree3.png").get_size()
         self.__score = 0
@@ -56,23 +58,24 @@ class Map:
         destination_y = current_y + change_y
 
         """maintain speed when moving diagonally"""
-        if change_x and change_y and self.__can_move_to(Vector2(destination_x, destination_y)):
+        if change_x and change_y and self.__hero_can_move_to(Vector2(destination_x, destination_y)):
             change_x /= math.sqrt(2)
             change_y /= math.sqrt(2)
 
         """change position if possible"""
-        if self.__can_move_to(Vector2(destination_x, current_y)):
+        if self.__hero_can_move_to(Vector2(destination_x, current_y)):
             self.__hero.get_map_position().x += change_x
-        if self.__can_move_to(Vector2(current_x, destination_y)):
+        if self.__hero_can_move_to(Vector2(current_x, destination_y)):
             self.__hero.get_map_position().y += change_y
 
         self.__hero.set_angle()
 
     def move_monsters(self, move_speed):
         tmp = move_speed
-        slower = move_speed*0.3
+        slower = move_speed * 0.3
         monster_freeze_time = 1
         max_distance = self.__hero.get_image().get_size()[1] / 2
+
         for monster in self.__monsters:
             if math.dist(monster.get_map_position(), self.__hero.get_map_position()) > max_distance:
 
@@ -83,6 +86,9 @@ class Map:
                         monster.set_time()
                 else:
                     move_speed = tmp
+
+                shift = monster.get_image().get_size()[0] / 2
+
                 x = monster.get_map_position().x + monster.get_unit_vector().x * move_speed
                 y = monster.get_map_position().y + monster.get_unit_vector().y * move_speed
 
@@ -96,28 +102,36 @@ class Map:
                 yr = monster.get_map_position().y + monster.get_unit_vector(
                     (monster.get_angle() + 60) % 360).y * move_speed
 
-                can_move = True
+                can_move_forward = True
                 can_turn_left = True
                 can_turn_right = True
 
                 for other_monster in self.__monsters:
                     distance = math.dist(monster.get_map_position(), other_monster.get_map_position())
 
-                    if other_monster != monster and distance < max_distance:
+                    if other_monster != monster and distance < max_distance :
                         """Given monster can't go straight check if he turn left or right """
 
                         if distance >= math.dist(Vector2(x, y), other_monster.get_map_position()):
-                            can_move = False
+                            can_move_forward = False
                         if distance >= math.dist(Vector2(xl, yl), other_monster.get_map_position()):
                             can_turn_left = False
                         if distance >= math.dist(Vector2(xr, yr), other_monster.get_map_position()):
                             can_turn_right = False
 
-                        if not (can_move or can_turn_right or can_turn_left):
+                        if not (can_move_forward or can_turn_right or can_turn_left):
                             break
 
+                # if not self.__monster_can_move_to(Vector2(x + shift, y + shift)):
+                #     can_move_forward = False
+                #
+                # if not self.__monster_can_move_to(Vector2(x + shift, y + shift)):
+                #     can_turn_left = False
+                # if not self.__monster_can_move_to(Vector2(x + shift, y + shift)):
+                #     can_turn_right = False
+
                 """set new cords"""
-                if can_move:
+                if can_move_forward:
                     monster.get_map_position().x = x
                     monster.get_map_position().y = y
 
@@ -137,9 +151,14 @@ class Map:
         camera_y = self.__hero.get_map_position().y - self.__hero.get_screen_position().y
         return Vector2(camera_x, camera_y)
 
-    def __can_move_to(self, v):
+    def __hero_can_move_to(self, v):
         cords = self.__get_cords_in_array(v)
-        return self.__array[int(cords.x)][int(cords.y)]
+        return self.__array[int(cords.x)][int(cords.y)] % 2
+
+    def __monster_can_move_to(self, v):
+        cords = self.__get_cords_in_array(v)
+
+        return self.__array[int(cords.x)][int(cords.y)] != 2
 
     def get_hero(self):
         return self.__hero
@@ -185,19 +204,19 @@ class Map:
         """randomly places monster on the edge of map"""
         if randint(0, 1):
             if randint(0, 1):
-                x = 0
+                x = 2*self.__chunk_size
             else:
-                x = self.__size.x
+                x = self.__size.x - 2*self.__chunk_size
 
-            y = randint(0, int(self.__size.y))
+            y = randint(2*self.__chunk_size, int(self.__size.y - 2*self.__chunk_size))
 
         else:
             if randint(0, 1):
-                y = 0
+                y = 2*self.__chunk_size
             else:
-                y = self.__size.y
+                y = self.__size.y - 2*self.__chunk_size
 
-            x = randint(0, int(self.__size.x))
+            x = randint(2*self.__chunk_size, int(self.__size.x) - 2*self.__chunk_size)
 
         self.__monsters.append(Monster(Vector2(x, y)))
 
@@ -216,11 +235,14 @@ class Map:
     def get_chunk_size(self):
         return self.__chunk_size
 
-    def get_background(self):
-        return self.__background
+    def get_borders(self):
+        return self.__borders
 
     def get_grassland(self):
         return self.__grassland
+
+    def get_map_elements(self):
+        return self.__map_elements
 
     def get_bullet_image(self):
         return self.__bullet_image
@@ -245,23 +267,23 @@ class Map:
 
     def distance(self, obj1, obj2):
         x1, y1 = obj1.get_map_position()
-        x1 += obj1.get_image().get_width()/2
-        y1 += obj1.get_image().get_height()/2
+        x1 += obj1.get_image().get_width() / 2
+        y1 += obj1.get_image().get_height() / 2
 
         x2, y2 = obj2.get_map_position()
         x2 += obj2.get_image().get_width() / 2
         y2 += obj2.get_image().get_height() / 2
 
-        return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+        return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
     def check_collisions(self):
         bull_h = 0
         monst_h = 0
-        hero_h = self.__hero.get_image().get_height()*2/5
+        hero_h = self.__hero.get_image().get_height() * 2 / 5
         if len(self.__bullets) > 0:
-            bull_h = self.__bullets[0].get_image().get_height()*2/5
+            bull_h = self.__bullets[0].get_image().get_height() * 2 / 5
         if len(self.__monsters) > 0:
-            monst_h = self.__monsters[0].get_image().get_height()*2/5
+            monst_h = self.__monsters[0].get_image().get_height() * 2 / 5
         for bullet in self.__bullets:
             for monster in self.__monsters:
                 if self.distance(monster, bullet) < bull_h + monst_h:

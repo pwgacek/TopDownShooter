@@ -84,9 +84,9 @@ def get_rotated_image(image, angle):
     return rot_image
 
 
-def generate_background(chunk_size, map_size, array):
+def generate_borders(chunk_size, map_size, array):
     tree_image = pygame.image.load("assets/tree3.png")
-    background = pygame.Surface((map_size.x, map_size.y), pygame.SRCALPHA)
+    borders = pygame.Surface((map_size.x, map_size.y), pygame.SRCALPHA)
     width = int(map_size.x / chunk_size)
     height = int(map_size.y / chunk_size)
 
@@ -94,10 +94,10 @@ def generate_background(chunk_size, map_size, array):
     for i in range(width):
         for j in range(height):
             if array[i][j] == 0:
-                background.blit(get_rotated_image(tree_image, random.randint(0, 359)),
+                borders.blit(get_rotated_image(tree_image, random.randint(0, 359)),
                                 Vector2(i * chunk_size - shift, j * chunk_size - shift))
 
-    return background
+    return borders
 
 
 def generate_grass(chunk_size, map_size, array):
@@ -109,7 +109,7 @@ def generate_grass(chunk_size, map_size, array):
     grassland = pygame.Surface((map_size.x, map_size.y), pygame.SRCALPHA)
     width = int(map_size.x / chunk_size)
     height = int(map_size.y / chunk_size)
-    # print(width, height)
+
     for i in range(width):
         for j in range(height):
             if array[i][j] == 1:
@@ -119,3 +119,56 @@ def generate_grass(chunk_size, map_size, array):
                                    Vector2(i * chunk_size, j * chunk_size))
 
     return grassland
+
+
+def generate_map_elements(chunk_size, map_size, array):
+
+    tree_image = pygame.image.load("assets/tree3.png")
+    shift = (tree_image.get_size()[0] - chunk_size) / 2
+
+    big_tree = pygame.Surface((2*chunk_size + shift, 2*chunk_size + 2*shift), pygame.SRCALPHA)
+    """merging for trees into one big tree"""
+    big_tree.blit(get_rotated_image(tree_image, randint(0, 359)), Vector2(0, 0))
+    big_tree.blit(get_rotated_image(tree_image, randint(0, 359)), Vector2(chunk_size-shift, 0))
+    big_tree.blit(get_rotated_image(tree_image, randint(0, 359)), Vector2(0, chunk_size-shift))
+    big_tree.blit(get_rotated_image(tree_image, randint(0, 359)), Vector2(chunk_size-shift, chunk_size-shift))
+
+    map_elements = pygame.Surface((map_size.x, map_size.y), pygame.SRCALPHA)
+
+    width = int(map_size.x / chunk_size)
+    height = int(map_size.y / chunk_size)
+
+    middle_x = width//2
+    middle_y = height//2
+
+    def at_hero_starting_pos(x, y):
+        return x == middle_x or x == middle_x+1 or y == middle_y or y == middle_y + 1
+
+
+    def can_place_big_tree(x, y):
+        for k in range(-1, 3):
+            for l in range(-1, 3):
+                if array[x+k][y+l] == 0 and not at_hero_starting_pos(x+k, y+l):
+                    return False
+
+        return True
+
+    #available_places_array = [[False for _ in range(1, width - 2)] for _ in range(1, height - 2)]
+    available_places_list = list()
+
+    for i in range(1, width - 2, 2):
+        for j in range(1, height - 2, 2):
+            if can_place_big_tree(i, j):
+                #available_places_array[i][j] = True
+                available_places_list.append((i, j))
+
+    for _ in range(min(10,len(available_places_list)//2)):
+        index = randint(0,len(available_places_list)-1)
+        x, y = available_places_list.pop(index)
+        array[x][y] = array[x+1][y] = array[x][y+1] = array[x+1][y+1] = 2
+
+        map_elements.blit(big_tree,
+                          Vector2(x * chunk_size - shift, y * chunk_size - shift))
+
+    return map_elements
+

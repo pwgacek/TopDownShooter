@@ -143,9 +143,14 @@ class GameEngine:
                 self.__screen.blit(bullet.get_image(),
                                    bullet.get_screen_position(self.__map.get_camera_position()))
 
-        """shows map on the screen"""
-        self.__screen.blit(self.__map.get_background(), Vector2(0, 0),
+        """shows forest on the screen"""
+        self.__screen.blit(self.__map.get_borders(), Vector2(0, 0),
                            pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
+
+        """show map elements on the screen"""
+        self.__screen.blit(self.__map.get_map_elements(), Vector2(0, 0),
+                           pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
+
 
         "draw hero health"
         pygame.draw.rect(self.__screen, (255, 0, 0), (20, 20, self.__map.get_hero().get_max_hp() * 35, 20))
