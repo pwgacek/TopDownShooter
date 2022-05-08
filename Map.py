@@ -9,6 +9,7 @@ from Bullet import Bullet
 from Hero import Hero
 from MapGenerator import generate_array, generate_borders, generate_grass, generate_map_elements
 from Monster import Monster
+from FirstAidKit import FirstAidKit
 
 
 class Map:
@@ -21,6 +22,7 @@ class Map:
         self.__bullets = list()
         # self.__font = pygame.font.SysFont('Bradley Hand ITC', 50, bold=pygame.font.Font.bold)
         self.__monsters = list()
+        self.__first_aid_kits = list()
         self.__bullet_image = pygame.image.load("assets/ammo1.png")
         self.__reload = pygame.image.load("assets/reload.png")
         self.__reload_angle = 0
@@ -89,59 +91,31 @@ class Map:
 
                 shift = monster.get_image().get_size()[0] / 2
 
-                x = monster.get_map_position().x + monster.get_unit_vector().x * move_speed
-                y = monster.get_map_position().y + monster.get_unit_vector().y * move_speed
+                angles = [0,30,-30,60,-60,87,-87]
 
-                xl = monster.get_map_position().x + monster.get_unit_vector(
-                    (monster.get_angle() - 60) % 360).x * move_speed
-                yl = monster.get_map_position().y + monster.get_unit_vector(
-                    (monster.get_angle() - 60) % 360).y * move_speed
+                for a in angles:
+                    vector = monster.get_unit_vector(monster.get_angle() + a)
+                    x = monster.get_map_position().x + shift + vector.x * move_speed
+                    y = monster.get_map_position().y + shift + vector.y * move_speed
 
-                xr = monster.get_map_position().x + monster.get_unit_vector(
-                    (monster.get_angle() + 60) % 360).x * move_speed
-                yr = monster.get_map_position().y + monster.get_unit_vector(
-                    (monster.get_angle() + 60) % 360).y * move_speed
+                    can_move = True
 
-                can_move_forward = True
-                can_turn_left = True
-                can_turn_right = True
+                    for other_monster in self.__monsters:
+                        distance = math.dist(monster.get_map_position(), other_monster.get_map_position())
 
-                for other_monster in self.__monsters:
-                    distance = math.dist(monster.get_map_position(), other_monster.get_map_position())
+                        if not self.__monster_can_move_to(Vector2(x, y)):
+                            can_move = False
+                        elif other_monster != monster and distance < max_distance :
+                            """Given monster can't go straight check if he turn left or right """
 
-                    if other_monster != monster and distance < max_distance :
-                        """Given monster can't go straight check if he turn left or right """
+                            if distance >= math.dist(Vector2(x - shift, y - shift), other_monster.get_map_position()):
+                                can_move = False
+                                break
 
-                        if distance >= math.dist(Vector2(x, y), other_monster.get_map_position()):
-                            can_move_forward = False
-                        if distance >= math.dist(Vector2(xl, yl), other_monster.get_map_position()):
-                            can_turn_left = False
-                        if distance >= math.dist(Vector2(xr, yr), other_monster.get_map_position()):
-                            can_turn_right = False
-
-                        if not (can_move_forward or can_turn_right or can_turn_left):
-                            break
-
-                # if not self.__monster_can_move_to(Vector2(x + shift, y + shift)):
-                #     can_move_forward = False
-                #
-                # if not self.__monster_can_move_to(Vector2(x + shift, y + shift)):
-                #     can_turn_left = False
-                # if not self.__monster_can_move_to(Vector2(x + shift, y + shift)):
-                #     can_turn_right = False
-
-                """set new cords"""
-                if can_move_forward:
-                    monster.get_map_position().x = x
-                    monster.get_map_position().y = y
-
-                elif can_turn_left:
-                    monster.get_map_position().x = xl
-                    monster.get_map_position().y = yl
-
-                elif can_turn_right:
-                    monster.get_map_position().x = xr
-                    monster.get_map_position().y = yr
+                    if can_move:
+                        monster.get_map_position().x = x - shift
+                        monster.get_map_position().y = y - shift
+                        break
 
                 monster.set_angle(self.__hero.get_map_position())
 
@@ -157,8 +131,11 @@ class Map:
 
     def __monster_can_move_to(self, v):
         cords = self.__get_cords_in_array(v)
-
         return self.__array[int(cords.x)][int(cords.y)] != 2
+
+    def __bullet_hit_map_element(self, v):
+        cords = self.__get_cords_in_array(v)
+        return self.__array[int(cords.x)][int(cords.y)] % 2 == 0
 
     def get_hero(self):
         return self.__hero
@@ -182,7 +159,7 @@ class Map:
 
     def remove_bullets(self):
         for i in self.__bullets:
-            if self.bullet_not_in_bounds(i):
+            if self.bullet_not_in_bounds(i) or self.__bullet_hit_map_element(i.get_map_position()):
                 self.__bullets.remove(i)
 
     def bullet_not_in_bounds(self, bullet):
@@ -195,6 +172,8 @@ class Map:
     def get_bullets(self):
         return self.__bullets
 
+    def get_firs_aid_kits(self):
+        return self.__first_aid_kits
     # def get_font(self):
     #     return self.__font
 
@@ -218,7 +197,7 @@ class Map:
 
             x = randint(2*self.__chunk_size, int(self.__size.x) - 2*self.__chunk_size)
 
-        self.__monsters.append(Monster(Vector2(x, y)))
+        self.__monsters.append(Monster(Vector2(x,y)))
 
     def __remove_monster(self, monster):
         self.__monsters.remove(monster)
@@ -284,12 +263,22 @@ class Map:
             bull_h = self.__bullets[0].get_image().get_height() * 2 / 5
         if len(self.__monsters) > 0:
             monst_h = self.__monsters[0].get_image().get_height() * 2 / 5
+
+        for fak in self.__first_aid_kits :
+            if self.distance(self.__hero,fak) < self.__hero.get_image().get_width() // 2:
+                self.__hero.heal()
+                self.__first_aid_kits.remove(fak)
+
         for bullet in self.__bullets:
             for monster in self.__monsters:
                 if self.distance(monster, bullet) < bull_h + monst_h:
                     self.__bullets.remove(bullet)
                     not_remove = monster.shot(time())
                     if not not_remove:
+                        if randint(0 , 10) == 10:
+                            shift = monster.get_image().get_size()[0] // 2
+                            pos = Vector2(monster.get_map_position().x + shift,monster.get_map_position().y + shift)
+                            self.__first_aid_kits.append(FirstAidKit(pos))
                         self.__monsters.remove(monster)
                         self.score_point()
                     break
@@ -303,6 +292,7 @@ class Map:
                     self.__hero.hurt()
                     if self.__hero.get_hp() == 0:
                         return False
+
         return True
 
     def get_reload_icon(self):
@@ -327,3 +317,4 @@ class Map:
 
     def set_reload_time(self, time1):
         self.__reload_time = time1
+

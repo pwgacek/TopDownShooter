@@ -3,6 +3,7 @@ from time import time
 import pygame
 from pygame.math import Vector2
 
+from FirstAidKit import FirstAidKit
 from Map import Map
 
 
@@ -126,6 +127,11 @@ class GameEngine:
         """show grass"""
         self.__screen.blit(self.__map.get_grassland(), Vector2(0, 0),
                            pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
+
+        """show first aid kits"""
+        for fsk in self.__map.get_firs_aid_kits():
+            if self.__map.is_on_screen(fsk, self.__map.get_camera_position()):
+                self.__screen.blit(fsk.get_image(), fsk.get_screen_position(self.__map.get_camera_position()))
 
         """shows hero on the screen"""
         self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())

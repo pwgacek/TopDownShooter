@@ -63,3 +63,6 @@ class Hero:
 
     def get_max_hp(self):
         return self.__max_hp
+
+    def heal(self):
+        self.__hp = self.__max_hp
