@@ -81,7 +81,8 @@ class GameEngine:
                 delta = 0
             """move all map elements"""
             self.move_map_elements(move_direction_flags, fps)
-            hero_alive = self.__map.check_collisions()
+            self.__map.check_collisions()
+            hero_alive = self.__map.get_hero().get_hp() > 0
             """clears screen"""
             self.__screen.fill((0, 102, 0))
             """draws  map elements and ammo """
@@ -146,7 +147,8 @@ class GameEngine:
 
         for bullet in self.__map.get_bullets():
             if self.__map.is_on_screen(bullet, self.__map.get_camera_position()):
-                self.__screen.blit(bullet.get_image(),
+                self.__screen.blit(pygame.transform.rotate(pygame.image.load("assets/bullet.png"),
+                                                           bullet.get_angle() - 90),
                                    bullet.get_screen_position(self.__map.get_camera_position()))
 
         """shows forest on the screen"""

@@ -4,10 +4,12 @@ import math
 
 
 class Bullet:
-    def __init__(self, map_position, angle, hero_size):
 
+    __image = pygame.image.load("assets/bullet.png")
+
+    def __init__(self, map_position, angle, hero_size):
         self.__angle = angle
-        self.__image = pygame.transform.rotate(pygame.image.load("assets/bullet.png"), angle - 90)
+        #self.__image = pygame.transform.rotate(pygame.image.load("assets/bullet.png"), angle - 90)
         self.__map_position = Vector2(
             map_position.x + hero_size[0]/2 - self.__image.get_size()[0]/2 + math.cos(math.radians(angle-14)) * 50,
             map_position.y + hero_size[1]/2 - self.__image.get_size()[1]/2 - math.sin(math.radians(angle-14)) * 50)
@@ -29,6 +31,6 @@ class Bullet:
 
     def get_angle(self):
         return self.__angle
-
-    def get_image(self):
-        return self.__image
+    @classmethod
+    def get_image(cls):
+        return cls.__image

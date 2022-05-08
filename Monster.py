@@ -6,10 +6,11 @@ from time import time
 
 
 class Monster:
+    __image = pygame.image.load("assets/monster1.png")
+
     def __init__(self, map_position):
         self.__map_position = map_position
         self.__angle = 0
-        self.__image = pygame.image.load("assets/monster1.png")
         self.__hp = 3
         self.__shot_time = 0
         self.__last_attack = 0
@@ -23,8 +24,9 @@ class Monster:
     def get_angle(self):
         return self.__angle
 
-    def get_image(self):
-        return self.__image
+    @classmethod
+    def get_image(cls):
+        return cls.__image
 
     def get_unit_vector(self, a=None):
         """returns angle converted to unit vector"""
@@ -61,9 +63,11 @@ class Monster:
             if my_center[0] < hero_center[0]:
                 self.__angle = 360.0 - self.__angle
 
-    def shot(self, time1):
-        self.__shot_time = time1
+    def hurt(self, shot_time):
+        self.__shot_time = shot_time
         self.__hp -= 1
+
+    def get_hp(self):
         return self.__hp
 
     def get_time(self):

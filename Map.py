@@ -28,13 +28,12 @@ class Map:
         self.__reload_angle = 0
         self.__reload_time = 0
         self.__borders = generate_borders(self.__chunk_size,
-                                             Vector2(self.__size.x, self.__size.y), self.__array)
+                                          Vector2(self.__size.x, self.__size.y), self.__array)
         self.__grassland = generate_grass(self.__chunk_size,
                                           Vector2(self.__size.x, self.__size.y), self.__array)
         self.__map_elements = generate_map_elements(self.__chunk_size,
                                                     Vector2(self.__size.x, self.__size.y), self.__array)
         self.__min_no_monsters = 5
-        self.__tree_size = pygame.image.load("assets/tree3.png").get_size()
         self.__score = 0
 
     def move_hero(self, move_direction_flags, move_speed):
@@ -73,7 +72,7 @@ class Map:
         self.__hero.set_angle()
 
     def move_monsters(self, move_speed):
-        tmp = move_speed
+        faster = move_speed
         slower = move_speed * 0.3
         monster_freeze_time = 1
         max_distance = self.__hero.get_image().get_size()[1] / 2
@@ -81,18 +80,19 @@ class Map:
         for monster in self.__monsters:
             if math.dist(monster.get_map_position(), self.__hero.get_map_position()) > max_distance:
 
+                """monster moves slower after being hit"""
                 if monster.get_time() != 0:
                     if monster.get_time() + monster_freeze_time > time():
                         move_speed = slower
                     else:
                         monster.set_time()
                 else:
-                    move_speed = tmp
+                    move_speed = faster
 
-                shift = monster.get_image().get_size()[0] / 2
+                shift = Monster.get_image().get_size()[0] / 2
 
-                angles = [0,30,-30,60,-60,87,-87]
-
+                angles = [0, 30, -30, 60, -60, 87, -87]
+                """checks if monster can move in given direction"""
                 for a in angles:
                     vector = monster.get_unit_vector(monster.get_angle() + a)
                     x = monster.get_map_position().x + shift + vector.x * move_speed
@@ -103,9 +103,9 @@ class Map:
                     for other_monster in self.__monsters:
                         distance = math.dist(monster.get_map_position(), other_monster.get_map_position())
 
-                        if not self.__monster_can_move_to(Vector2(x, y)):
+                        if not self.__no_obstacles_for_monster(Vector2(x, y)):
                             can_move = False
-                        elif other_monster != monster and distance < max_distance :
+                        elif other_monster != monster and distance < max_distance:
                             """Given monster can't go straight check if he turn left or right """
 
                             if distance >= math.dist(Vector2(x - shift, y - shift), other_monster.get_map_position()):
@@ -127,9 +127,16 @@ class Map:
 
     def __hero_can_move_to(self, v):
         cords = self.__get_cords_in_array(v)
+        shift = Monster.get_image().get_width() // 2
+
+        for monster in self.__monsters:
+            v2 = Vector2(monster.get_map_position().x + shift, monster.get_map_position().y + shift)
+
+            if math.dist(v, v2) < self.__hero.get_image().get_size()[1] / 2:
+                return False
         return self.__array[int(cords.x)][int(cords.y)] % 2
 
-    def __monster_can_move_to(self, v):
+    def __no_obstacles_for_monster(self, v):
         cords = self.__get_cords_in_array(v)
         return self.__array[int(cords.x)][int(cords.y)] != 2
 
@@ -174,6 +181,7 @@ class Map:
 
     def get_firs_aid_kits(self):
         return self.__first_aid_kits
+
     # def get_font(self):
     #     return self.__font
 
@@ -183,21 +191,21 @@ class Map:
         """randomly places monster on the edge of map"""
         if randint(0, 1):
             if randint(0, 1):
-                x = 2*self.__chunk_size
+                x = 2 * self.__chunk_size
             else:
-                x = self.__size.x - 2*self.__chunk_size
+                x = self.__size.x - 2 * self.__chunk_size
 
-            y = randint(2*self.__chunk_size, int(self.__size.y - 2*self.__chunk_size))
+            y = randint(2 * self.__chunk_size, int(self.__size.y - 2 * self.__chunk_size))
 
         else:
             if randint(0, 1):
-                y = 2*self.__chunk_size
+                y = 2 * self.__chunk_size
             else:
-                y = self.__size.y - 2*self.__chunk_size
+                y = self.__size.y - 2 * self.__chunk_size
 
-            x = randint(2*self.__chunk_size, int(self.__size.x) - 2*self.__chunk_size)
+            x = randint(2 * self.__chunk_size, int(self.__size.x) - 2 * self.__chunk_size)
 
-        self.__monsters.append(Monster(Vector2(x,y)))
+        self.__monsters.append(Monster(Vector2(x, y)))
 
     def __remove_monster(self, monster):
         self.__monsters.remove(monster)
@@ -235,16 +243,13 @@ class Map:
     def increase_min_no_monsters(self, num):
         self.__min_no_monsters += num
 
-    def get_tree_size(self):
-        return self.__tree_size
-
     def score_point(self):
         self.__score += 1
 
     def get_score(self):
         return self.__score
 
-    def distance(self, obj1, obj2):
+    def get_distance(self, obj1, obj2):
         x1, y1 = obj1.get_map_position()
         x1 += obj1.get_image().get_width() / 2
         y1 += obj1.get_image().get_height() / 2
@@ -256,44 +261,39 @@ class Map:
         return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
     def check_collisions(self):
-        bull_h = 0
-        monst_h = 0
+        bullet_h = Bullet.get_image().get_height() * 2 / 5
+        monster_h = Monster.get_image().get_height() * 2 / 5
         hero_h = self.__hero.get_image().get_height() * 2 / 5
-        if len(self.__bullets) > 0:
-            bull_h = self.__bullets[0].get_image().get_height() * 2 / 5
-        if len(self.__monsters) > 0:
-            monst_h = self.__monsters[0].get_image().get_height() * 2 / 5
 
-        for fak in self.__first_aid_kits :
-            if self.distance(self.__hero,fak) < self.__hero.get_image().get_width() // 2:
+        """hero takes first aid kit"""
+        for fak in self.__first_aid_kits:
+            if self.get_distance(self.__hero, fak) < self.__hero.get_image().get_width() // 2:
                 self.__hero.heal()
                 self.__first_aid_kits.remove(fak)
 
+        """bullet hits monster"""
         for bullet in self.__bullets:
             for monster in self.__monsters:
-                if self.distance(monster, bullet) < bull_h + monst_h:
+                if self.get_distance(monster, bullet) < bullet_h + monster_h:
                     self.__bullets.remove(bullet)
-                    not_remove = monster.shot(time())
-                    if not not_remove:
-                        if randint(0 , 10) == 10:
+                    monster.hurt(time())
+
+                    if monster.get_hp() == 0:
+                        if randint(0, 10) == 10:
+                            """drops first aid kit"""
                             shift = monster.get_image().get_size()[0] // 2
-                            pos = Vector2(monster.get_map_position().x + shift,monster.get_map_position().y + shift)
+                            pos = Vector2(monster.get_map_position().x + shift, monster.get_map_position().y + shift)
                             self.__first_aid_kits.append(FirstAidKit(pos))
                         self.__monsters.remove(monster)
                         self.score_point()
                     break
 
-        monster_attack_speed = 1
-
+        """monster attacks hero"""
         for monster in self.__monsters:
-            if self.distance(self.__hero, monster) < monst_h + hero_h:
-                if monster.get_last_attack() == 0 or monster.get_last_attack() + monster_attack_speed < time():
+            if self.get_distance(self.__hero, monster) < monster_h + hero_h:
+                if monster.get_last_attack() == 0 or monster.get_last_attack() + 1 < time():
                     monster.attack()
                     self.__hero.hurt()
-                    if self.__hero.get_hp() == 0:
-                        return False
-
-        return True
 
     def get_reload_icon(self):
         return self.__reload
@@ -317,4 +317,3 @@ class Map:
 
     def set_reload_time(self, time1):
         self.__reload_time = time1
-
