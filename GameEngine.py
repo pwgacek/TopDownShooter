@@ -15,6 +15,7 @@ class GameEngine:
         self.__screen = pygame.display.set_mode((self.__width, self.__height))
         self.__map = Map(Vector2(self.__screen.get_size()))
         self.__font = pygame.font.SysFont('arial', 32, bold=pygame.font.Font.bold)
+        self.__font2 = pygame.font.SysFont('arial', 44, bold=pygame.font.Font.bold)
         pygame.display.set_caption("Top-Down Shooter")
 
     def run(self):
@@ -38,9 +39,9 @@ class GameEngine:
                     running = False
                     game_over = False
 
-                if event.type == pygame.MOUSEBUTTONDOWN and self.__map.get_hero().get_ammo() > 0 \
+                if event.type == pygame.MOUSEBUTTONDOWN and self.__map.get_hero().get_no_bullets_in_the_chamber() > 0 \
                         and self.__map.get_reload_time() == 0:
-                    """can choot with all mouse buttons"""
+                    """can shoot with all mouse buttons"""
                     # self.__map.add_bullet()
 
                     """shoot only with left button"""
@@ -50,7 +51,8 @@ class GameEngine:
                 if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_r:
-                        self.__map.set_reload_time(time())
+                        if self.__map.get_hero().get_no_ammo_packs() > 0:
+                            self.__map.set_reload_time(time())
 
                     if event.key == pygame.K_w:
                         move_direction_flags["up"] = True
@@ -130,9 +132,14 @@ class GameEngine:
                            pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
 
         """show first aid kits"""
-        for fsk in self.__map.get_firs_aid_kits():
-            if self.__map.is_on_screen(fsk, self.__map.get_camera_position()):
-                self.__screen.blit(fsk.get_image(), fsk.get_screen_position(self.__map.get_camera_position()))
+        for fak in self.__map.get_first_aid_kits():
+            if self.__map.is_on_screen(fak, self.__map.get_camera_position()):
+                self.__screen.blit(fak.get_image(), fak.get_screen_position(self.__map.get_camera_position()))
+
+        """show ammo packs"""
+        for ap in self.__map.get_ammo_packs():
+            if self.__map.is_on_screen(ap, self.__map.get_camera_position()):
+                self.__screen.blit(ap.get_image(), ap.get_screen_position(self.__map.get_camera_position()))
 
         """shows hero on the screen"""
         self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())
@@ -159,25 +166,32 @@ class GameEngine:
         self.__screen.blit(self.__map.get_map_elements(), Vector2(0, 0),
                            pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
 
-
         "draw hero health"
         pygame.draw.rect(self.__screen, (255, 0, 0), (20, 20, self.__map.get_hero().get_max_hp() * 35, 20))
         pygame.draw.rect(self.__screen, (0, 255, 0), (20, 20, self.__map.get_hero().get_hp() * 35, 20))
 
-        "show remaining ammo"
+        "show remaining ammo in chamber"
         ammo_shift = 20
-        for i in range(self.__map.get_hero().get_ammo()):
+        for i in range(self.__map.get_hero().get_no_bullets_in_the_chamber()):
             self.__screen.blit(self.__map.get_bullet_image(), (ammo_shift, 520))
             ammo_shift += self.__map.get_bullet_image().get_size()[0]
 
         "show score"
         score = self.__font.render("Score " + str(self.__map.get_score()), True, (255, 255, 255))
         self.__screen.blit(score, (640, 10))
+        "show remaining ammo"
+        self.__screen.blit(self.__map.get_ammo_image(), (660, 510))
+        ammo = self.__font2.render(str(self.__map.get_hero().get_no_ammo()),True,(255, 255, 255))
+        self.__screen.blit(ammo, (715, 530))
 
         "show reloading img"
         if self.__map.get_reload_time() != 0 and self.__map.get_reload_time() + 1 < time():
-            self.__map.get_hero().set_ammo(8)
-            self.__map.set_reload_time(0)
+            no_ammo_packs = self.__map.get_hero().get_no_ammo_packs()
+            if no_ammo_packs > 0:
+                self.__map.get_hero().change_no_ammo_packs(-1)
+                self.__map.get_hero().set_no_bullets_in_the_chamber(8)
+                self.__map.set_reload_time(0)
+
         elif self.__map.get_reload_time() != 0 and self.__map.get_reload_time() + 1 > time():
             self.__screen.blit(self.__map.get_rotated_image(), (370, 529))
 

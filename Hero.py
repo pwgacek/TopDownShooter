@@ -12,7 +12,8 @@ class Hero:
         self.__angle = 0
         self.__screen_position = Vector2(screen_size.x / 2 - self.__image.get_size()[0] / 2,
                                          screen_size.y / 2 - self.__image.get_size()[1] / 2)
-        self.__bullets = 8
+        self.__bullets_in_the_chamber = 8
+        self.__no_ammo_packs = 20
         self.__max_hp = 5
         self.__hp = 5
 
@@ -49,11 +50,20 @@ class Hero:
     def get_angle(self):
         return self.__angle
 
-    def get_ammo(self):
-        return self.__bullets
+    def get_no_bullets_in_the_chamber(self):
+        return self.__bullets_in_the_chamber
 
-    def set_ammo(self, x):
-        self.__bullets = x
+    def set_no_bullets_in_the_chamber(self, x):
+        self.__bullets_in_the_chamber = x
+
+    def get_no_ammo_packs(self):
+        return self.__no_ammo_packs
+
+    def change_no_ammo_packs(self, num):
+        self.__no_ammo_packs += num
+
+    def get_no_ammo(self):
+        return self.__no_ammo_packs * 8 + self.__bullets_in_the_chamber
 
     def hurt(self):
         self.__hp -= 1

@@ -3,6 +3,8 @@ import math
 import pygame
 from pygame.math import Vector2
 from time import time
+from random import randint
+
 
 
 class Monster:
@@ -11,9 +13,10 @@ class Monster:
     def __init__(self, map_position):
         self.__map_position = map_position
         self.__angle = 0
-        self.__hp = 3
+        self.__hp = randint(2, 4)
         self.__shot_time = 0
         self.__last_attack = 0
+        self.__speed_ratio = float(randint(8, 12))/10
 
     def __eq__(self, other):
         return self is other
@@ -81,3 +84,6 @@ class Monster:
 
     def get_last_attack(self):
         return self.__last_attack
+
+    def get_speed_ratio(self):
+        return self.__speed_ratio

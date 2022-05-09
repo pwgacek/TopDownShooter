@@ -5,6 +5,7 @@ from time import time
 import pygame
 from pygame.math import Vector2
 
+from AmmoPack import AmmoPack
 from Bullet import Bullet
 from Hero import Hero
 from MapGenerator import generate_array, generate_borders, generate_grass, generate_map_elements
@@ -23,8 +24,10 @@ class Map:
         # self.__font = pygame.font.SysFont('Bradley Hand ITC', 50, bold=pygame.font.Font.bold)
         self.__monsters = list()
         self.__first_aid_kits = list()
+        self.__ammo_packs = list()
         self.__bullet_image = pygame.image.load("assets/ammo1.png")
         self.__reload = pygame.image.load("assets/reload.png")
+        self.__ammo_image = pygame.image.load("assets/ammo_pack2.png")
         self.__reload_angle = 0
         self.__reload_time = 0
         self.__borders = generate_borders(self.__chunk_size,
@@ -35,6 +38,7 @@ class Map:
                                                     Vector2(self.__size.x, self.__size.y), self.__array)
         self.__min_no_monsters = 5
         self.__score = 0
+
 
     def move_hero(self, move_direction_flags, move_speed):
         if (move_direction_flags["down"] and move_direction_flags["up"]) or \
@@ -95,8 +99,8 @@ class Map:
                 """checks if monster can move in given direction"""
                 for a in angles:
                     vector = monster.get_unit_vector(monster.get_angle() + a)
-                    x = monster.get_map_position().x + shift + vector.x * move_speed
-                    y = monster.get_map_position().y + shift + vector.y * move_speed
+                    x = monster.get_map_position().x + shift + vector.x * move_speed * monster.get_speed_ratio()
+                    y = monster.get_map_position().y + shift + vector.y * move_speed * monster.get_speed_ratio()
 
                     can_move = True
 
@@ -148,7 +152,8 @@ class Map:
         return self.__hero
 
     def add_bullet(self):
-        self.__hero.set_ammo(self.__hero.get_ammo() - 1)
+        self.__hero.set_no_bullets_in_the_chamber(self.__hero.get_no_bullets_in_the_chamber() - 1)
+
         a = self.__hero.get_map_position().x
         b = self.__hero.get_map_position().y
 
@@ -179,8 +184,11 @@ class Map:
     def get_bullets(self):
         return self.__bullets
 
-    def get_firs_aid_kits(self):
+    def get_first_aid_kits(self):
         return self.__first_aid_kits
+
+    def get_ammo_packs(self):
+        return self.__ammo_packs
 
     # def get_font(self):
     #     return self.__font
@@ -234,6 +242,9 @@ class Map:
     def get_bullet_image(self):
         return self.__bullet_image
 
+    def get_ammo_image(self):
+        return self.__ammo_image
+
     def keep_no_monsters(self):
         no_needed_monsters = self.__min_no_monsters - len(self.__monsters)
         if no_needed_monsters > 0:
@@ -265,11 +276,17 @@ class Map:
         monster_h = Monster.get_image().get_height() * 2 / 5
         hero_h = self.__hero.get_image().get_height() * 2 / 5
 
-        """hero takes first aid kit"""
+        """hero grabs first aid kit"""
+        dist = self.__hero.get_image().get_width() // 2
         for fak in self.__first_aid_kits:
-            if self.get_distance(self.__hero, fak) < self.__hero.get_image().get_width() // 2:
+            if self.get_distance(self.__hero, fak) < dist:
                 self.__hero.heal()
                 self.__first_aid_kits.remove(fak)
+        """hero grabs ammo pack"""
+        for ap in self.__ammo_packs:
+            if self.get_distance(self.__hero, ap) < dist:
+                self.__hero.change_no_ammo_packs(2)
+                self.__ammo_packs.remove(ap)
 
         """bullet hits monster"""
         for bullet in self.__bullets:
@@ -279,11 +296,19 @@ class Map:
                     monster.hurt(time())
 
                     if monster.get_hp() == 0:
-                        if randint(0, 10) == 10:
+                        r = randint(0, 20)
+                        if r == 0:
                             """drops first aid kit"""
                             shift = monster.get_image().get_size()[0] // 2
                             pos = Vector2(monster.get_map_position().x + shift, monster.get_map_position().y + shift)
                             self.__first_aid_kits.append(FirstAidKit(pos))
+                        elif r == 1 or r == 2:
+
+                            """drops ammo pack"""
+                            shift = monster.get_image().get_size()[0] // 2
+                            pos = Vector2(monster.get_map_position().x + shift, monster.get_map_position().y + shift)
+                            self.__ammo_packs.append(AmmoPack(pos))
+
                         self.__monsters.remove(monster)
                         self.score_point()
                     break
@@ -317,3 +342,5 @@ class Map:
 
     def set_reload_time(self, time1):
         self.__reload_time = time1
+
+
