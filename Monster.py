@@ -6,9 +6,22 @@ from time import time
 from random import randint
 
 
+def generate_images(image):
+    images = [None for _ in range(360)]
+    for angle in range(360):
+        orig_rect = image.get_rect()
+        rot_image = pygame.transform.rotate(image, angle)
+        rot_rect = orig_rect.copy()
+        rot_rect.center = rot_image.get_rect().center
+        images[angle] = rot_image.subsurface(rot_rect).copy()
+
+    return images
+
 
 class Monster:
     __image = pygame.image.load("assets/monster1.png")
+    __images = generate_images(__image)
+    __size = Vector2(__image.get_size())
 
     def __init__(self, map_position):
         self.__map_position = map_position
@@ -16,10 +29,7 @@ class Monster:
         self.__hp = randint(2, 4)
         self.__shot_time = 0
         self.__last_attack = 0
-        self.__speed_ratio = float(randint(8, 12))/10
-
-    def __eq__(self, other):
-        return self is other
+        self.__speed_ratio = float(randint(8, 12)) / 10
 
     def get_map_position(self):
         return self.__map_position
@@ -42,24 +52,19 @@ class Monster:
 
     def get_rotated_image(self):
         """ returns rotated  image while keeping its center and size"""
-
-        orig_rect = self.__image.get_rect()
-        rot_image = pygame.transform.rotate(self.__image, self.__angle)
-        rot_rect = orig_rect.copy()
-        rot_rect.center = rot_image.get_rect().center
-        rot_image = rot_image.subsurface(rot_rect).copy()
-        return rot_image
+        return self.__images[int(self.__angle)]
 
     def get_screen_position(self, camera_position):
         return Vector2(self.__map_position.x - camera_position.x, self.__map_position.y - camera_position.y)
 
-    def set_angle(self, hero_map_position):
+    def set_angle(self, hero):
         """sets value of self.__angle in accordance with hero position"""
 
-        hero_center = Vector2(hero_map_position.x + self.__image.get_size()[0] / 2,
-                              hero_map_position.y + self.__image.get_size()[1] / 2)
-        my_center = Vector2(self.__map_position.x + self.__image.get_size()[0] / 2,
-                            self.__map_position.y + self.__image.get_size()[1] / 2)
+        hero_center = Vector2(hero.get_map_position().x + hero.get_size().x / 2,
+                              hero.get_map_position().y + hero.get_size().y / 2)
+        my_center = Vector2(self.__map_position.x + self.__size.x / 2,
+                            self.__map_position.y + self.__size.y / 2)
+
         distance = math.dist(hero_center, my_center)
         if distance > 1:
             self.__angle = math.degrees(math.acos((my_center.y - hero_center.y) / distance))
@@ -87,3 +92,7 @@ class Monster:
 
     def get_speed_ratio(self):
         return self.__speed_ratio
+
+    @classmethod
+    def get_size(cls):
+        return cls.__size

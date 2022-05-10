@@ -9,9 +9,10 @@ class Hero:
 
         self.__map_position = map_position
         self.__image = pygame.image.load("assets/hero2.2.png")
+        self.__size = Vector2(self.__image.get_size())
         self.__angle = 0
-        self.__screen_position = Vector2(screen_size.x / 2 - self.__image.get_size()[0] / 2,
-                                         screen_size.y / 2 - self.__image.get_size()[1] / 2)
+        self.__screen_position = Vector2(screen_size.x / 2 - self.get_size().x / 2,
+                                         screen_size.y / 2 - self.get_size().y / 2)
         self.__bullets_in_the_chamber = 8
         self.__no_ammo_packs = 20
         self.__max_hp = 5
@@ -20,8 +21,8 @@ class Hero:
     def set_angle(self):
         """sets value of self.__angle in accordance with mouse position"""
 
-        center = self.__screen_position.x + self.__image.get_size()[0] / 2, \
-                 self.__screen_position.y + self.__image.get_size()[1] / 2
+        center = self.__screen_position.x + self.get_size().x / 2, \
+                 self.__screen_position.y + self.get_size().y / 2
         distance = math.dist(pygame.mouse.get_pos(), center)
         if distance > 1:
             self.__angle = math.degrees(math.acos((center[1] - pygame.mouse.get_pos()[1]) / distance))
@@ -66,7 +67,8 @@ class Hero:
         return self.__no_ammo_packs * 8 + self.__bullets_in_the_chamber
 
     def hurt(self):
-        self.__hp -= 1
+        pass
+        #self.__hp -= 1
 
     def get_hp(self):
         return self.__hp
@@ -76,3 +78,6 @@ class Hero:
 
     def heal(self):
         self.__hp = self.__max_hp
+
+    def get_size(self):
+        return self.__size

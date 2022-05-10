@@ -193,7 +193,7 @@ class GameEngine:
                 self.__map.set_reload_time(0)
 
         elif self.__map.get_reload_time() != 0 and self.__map.get_reload_time() + 1 > time():
-            self.__screen.blit(self.__map.get_rotated_image(), (370, 529))
+            self.__screen.blit(self.__map.get_rotated_reload_image(), (370, 529))
 
     def set_map(self, map1):
         self.__map = map1

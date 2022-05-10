@@ -4,6 +4,7 @@ from pygame import Vector2
 
 class FirstAidKit:
     __image = pygame.image.load("assets/first_aid_kit.png")
+    __size = Vector2(__image.get_size())
 
     def __init__(self, map_position):
         self.__map_position = Vector2(map_position.x - self.__image.get_size()[0] // 2,
@@ -19,4 +20,6 @@ class FirstAidKit:
     def get_map_position(self):
         return self.__map_position
 
-
+    @classmethod
+    def get_size(cls):
+        return cls.__size
