@@ -67,8 +67,7 @@ class Hero:
         return self.__no_ammo_packs * 8 + self.__bullets_in_the_chamber
 
     def hurt(self):
-        pass
-        #self.__hp -= 1
+        self.__hp -= 1
 
     def get_hp(self):
         return self.__hp
