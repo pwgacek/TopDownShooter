@@ -319,6 +319,7 @@ class Map:
         for monster in self.__monsters:
             if get_distance(self.__hero, monster) < monster_h + hero_h:
                 if monster.get_last_attack() == 0 or monster.get_last_attack() + 1 < time():
+
                     monster.attack()
                     self.__hero.hurt()
 
