@@ -56,6 +56,11 @@ class GameEngine:
                         if event.button == 1:
                             self.__map.add_grenade()
 
+                    elif shotgun and self.__map.get_hero().get_no_shells_in_chamber() > 0:
+                        """shoot only with left button"""
+                        if event.button == 1:
+                            self.__map.shotgun_shot()
+
                 if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_r:
@@ -207,6 +212,11 @@ class GameEngine:
             for i in range(self.__map.get_hero().get_no_grenades_in_pocket()):
                 self.__screen.blit(self.__map.get_grenade_image(), (ammo_shift, 520))
                 ammo_shift += self.__map.get_grenade_image().get_size()[0]
+        elif shotgun:
+            for i in range(self.__map.get_hero().get_no_shells_in_chamber()):
+                self.__screen.blit(self.__map.get_shell_image(), (ammo_shift, 500))
+                ammo_shift += self.__map.get_shell_image().get_size()[0]
+
         "show score"
         score = self.__font.render("Score " + str(self.__map.get_score()), True, (255, 255, 255))
         self.__screen.blit(score, (640, 10))
@@ -220,6 +230,7 @@ class GameEngine:
             self.__screen.blit(self.__map.get_grenades_image(), (600, 510))
         elif shotgun:
             x = "s"
+            self.__screen.blit(self.__map.get_shotgun_shells_image(), (640, 510))
 
         ammo = self.__font2.render(str(self.__map.get_hero().get_no_ammo(x)), True, (255, 255, 255))
         self.__screen.blit(ammo, (715, 530))
@@ -237,6 +248,11 @@ class GameEngine:
             if no_grenades > 0 and grenade:
                 self.__map.get_hero().change_no_grenades_packs(-1)
                 self.__map.get_hero().set_no_grenades_in_pocket(3)
+                self.__map.set_reload_time(0)
+
+            if no_shotgun > 0 and shotgun:
+                self.__map.get_hero().change_no_shotgun_packs(-1)
+                self.__map.get_hero().set_no_shells_in_chamber(4)
                 self.__map.set_reload_time(0)
 
         elif self.__map.get_reload_time() != 0 and self.__map.get_reload_time() + 1 > time():

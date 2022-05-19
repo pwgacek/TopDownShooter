@@ -67,6 +67,12 @@ class Hero:
     def set_no_grenades_in_pocket(self, x):
         self.__grenades_in_pocket = x
 
+    def get_no_shells_in_chamber(self):
+        return self.__shotgun_shells_in_chamber
+
+    def set_no_shells_in_chamber(self, x):
+        self.__shotgun_shells_in_chamber = x
+
     def get_no_ammo_packs(self):
         return self.__no_ammo_packs
 

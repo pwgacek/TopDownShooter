@@ -41,9 +41,11 @@ class Map:
         self.__ammo_packs = list()
         self.__bullet_image = pygame.image.load("assets/ammo1.png")
         self.__grenade_image = pygame.image.load("assets/grenade_ico.png")
+        self.__shell_image = pygame.image.load("assets/shotgun_shell.png")
         self.__reload_image = pygame.image.load("assets/reload.png")
         self.__ammo_image = pygame.image.load("assets/ammo_pack2.png")
         self.__grenades_image = pygame.image.load("assets/many_grenades.png")
+        self.__shotgun_shells_image = pygame.image.load("assets/shotgun_shells.png")
         self.__reload_angle = 0
         self.__reload_time = 0
         self.__borders = generate_borders(self.__chunk_size,
@@ -180,6 +182,18 @@ class Map:
 
         self.__bullets.append(Bullet(map_position, angle, self.__hero.get_size()))
 
+    def shotgun_shot(self):
+        self.__hero.set_no_shells_in_chamber(self.__hero.get_no_shells_in_chamber() - 1)
+
+        a = self.__hero.get_map_position().x
+        b = self.__hero.get_map_position().y
+
+        map_position = Vector2(a, b)
+        angle = self.__hero.get_angle() + 90
+
+        for i in range(4):
+            self.__bullets.append(Bullet(map_position, angle-15 + i*10, self.__hero.get_size()))
+
     def add_grenade(self):
         self.__hero.set_no_grenades_in_pocket(self.__hero.get_no_grenades_in_pocket() - 1)
 
@@ -288,6 +302,12 @@ class Map:
 
     def get_grenades_image(self):
         return self.__grenades_image
+
+    def get_shell_image(self):
+        return self.__shell_image
+
+    def get_shotgun_shells_image(self):
+        return self.__shotgun_shells_image
 
     def keep_no_monsters(self):
         no_needed_monsters = self.__min_no_monsters - len(self.__monsters)
