@@ -184,11 +184,11 @@ class GameEngine:
                                                            bullet.get_angle() - 90),
                                    bullet.get_screen_position(self.__map.get_camera_position()))
 
-        for grenade in self.__map.get_grenades():
-            if self.__map.is_on_screen(grenade, self.__map.get_camera_position()):
+        for grenadee in self.__map.get_grenades():
+            if self.__map.is_on_screen(grenadee, self.__map.get_camera_position()):
                 self.__screen.blit(pygame.transform.rotate(pygame.image.load("assets/grenade.png"),
-                                                           grenade.get_angle() - 90),
-                                   grenade.get_screen_position(self.__map.get_camera_position()))
+                                                           grenadee.get_angle() - 90),
+                                   grenadee.get_screen_position(self.__map.get_camera_position()))
 
         """shows forest on the screen"""
         self.__screen.blit(self.__map.get_borders(), Vector2(0, 0),
