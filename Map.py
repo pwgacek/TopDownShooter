@@ -43,6 +43,7 @@ class Map:
         self.__grenade_image = pygame.image.load("assets/grenade_ico.png")
         self.__reload_image = pygame.image.load("assets/reload.png")
         self.__ammo_image = pygame.image.load("assets/ammo_pack2.png")
+        self.__grenades_image = pygame.image.load("assets/many_grenades.png")
         self.__reload_angle = 0
         self.__reload_time = 0
         self.__borders = generate_borders(self.__chunk_size,
@@ -206,7 +207,7 @@ class Map:
 
         for i in self.__grenades:
             if self.bullet_not_in_bounds(i) or self.__bullet_hit_map_element(i.get_map_position()):
-                self.__grenades.remove(i)
+                self.grenade_explode(i)
 
     def bullet_not_in_bounds(self, bullet):
         return bullet.get_map_position()[0] > self.__size.x or bullet.get_map_position()[1] > self.__size.y or \
@@ -284,6 +285,9 @@ class Map:
 
     def get_grenade_image(self):
         return self.__grenade_image
+
+    def get_grenades_image(self):
+        return self.__grenades_image
 
     def keep_no_monsters(self):
         no_needed_monsters = self.__min_no_monsters - len(self.__monsters)

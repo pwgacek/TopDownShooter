@@ -15,7 +15,10 @@ class Hero:
                                          screen_size.y / 2 - self.get_size().y / 2)
         self.__bullets_in_the_chamber = 8
         self.__grenades_in_pocket = 3
+        self.__shotgun_shells_in_chamber = 4
         self.__no_ammo_packs = 20
+        self.__no_grenade_packs = 20
+        self.__no_shotgun_shells_packs = 20
         self.__max_hp = 5
         self.__hp = 5
 
@@ -70,8 +73,31 @@ class Hero:
     def change_no_ammo_packs(self, num):
         self.__no_ammo_packs += num
 
-    def get_no_ammo(self):
-        return self.__no_ammo_packs * 8 + self.__bullets_in_the_chamber
+    def get_no_grenades_packs(self):
+        return self.__no_grenade_packs
+
+    def change_no_grenades_packs(self, x):
+        self.__no_grenade_packs += x
+
+    def get_no_shotgun_packs(self):
+        return self.__no_shotgun_shells_packs
+
+    def change_no_shotgun_packs(self, x):
+        self.__no_shotgun_shells_packs += x
+
+    def get_no_ammo(self, weapon_type):
+        if weapon_type == "p":
+            return self.__no_ammo_packs * 8 + self.__bullets_in_the_chamber
+        elif weapon_type == "g":
+            return self.__no_grenade_packs * 3 + self.__grenades_in_pocket
+        elif weapon_type == "s":
+            return self.__no_shotgun_shells_packs * 4 + self.__shotgun_shells_in_chamber
+
+    def get_no_granades(self):
+        return self.__no_grenade_packs * 3 + self.__grenades_in_pocket
+
+    def get_no_shotgun_shells(self):
+        return self.__no_shotgun_shells_packs * 4 + self.__shotgun_shells_in_chamber
 
     def hurt(self):
         self.__hp -= 1
