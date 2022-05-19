@@ -11,6 +11,7 @@ from Hero import Hero
 from MapGenerator import generate_array, generate_borders, generate_grass, generate_map_elements
 from Monster import Monster
 from FirstAidKit import FirstAidKit
+from Grenade import Grenade
 
 
 def get_distance(obj1, obj2):
@@ -33,11 +34,13 @@ class Map:
         self.__array = generate_array(30, self.__size.y, self.__size.y, self.__chunk_size, self.__screen_size)
         self.__hero = Hero(Vector2(self.__size.x / 2, self.__size.y / 2), self.__screen_size)
         self.__bullets = list()
+        self.__grenades = list()
         # self.__font = pygame.font.SysFont('Bradley Hand ITC', 50, bold=pygame.font.Font.bold)
         self.__monsters = list()
         self.__first_aid_kits = list()
         self.__ammo_packs = list()
         self.__bullet_image = pygame.image.load("assets/ammo1.png")
+        self.__grenade_image = pygame.image.load("assets/grenade_ico.png")
         self.__reload_image = pygame.image.load("assets/reload.png")
         self.__ammo_image = pygame.image.load("assets/ammo_pack2.png")
         self.__reload_angle = 0
@@ -176,16 +179,34 @@ class Map:
 
         self.__bullets.append(Bullet(map_position, angle, self.__hero.get_size()))
 
-    def move_bullets(self):
+    def add_grenade(self):
+        self.__hero.set_no_grenades_in_pocket(self.__hero.get_no_grenades_in_pocket() - 1)
+
+        a = self.__hero.get_map_position().x
+        b = self.__hero.get_map_position().y
+
+        map_position = Vector2(a, b)
+        angle = self.__hero.get_angle() + 90
+
+        self.__grenades.append(Grenade(map_position, angle, self.__hero.get_size()))
+
+    def move_bullets_and_grenades(self):
         for bullet in self.__bullets:
             bullet.move()
 
-        self.remove_bullets()
+        for grenade in self.__grenades:
+            grenade.move()
 
-    def remove_bullets(self):
+        self.remove_bullets_and_grenades()
+
+    def remove_bullets_and_grenades(self):
         for i in self.__bullets:
             if self.bullet_not_in_bounds(i) or self.__bullet_hit_map_element(i.get_map_position()):
                 self.__bullets.remove(i)
+
+        for i in self.__grenades:
+            if self.bullet_not_in_bounds(i) or self.__bullet_hit_map_element(i.get_map_position()):
+                self.__grenades.remove(i)
 
     def bullet_not_in_bounds(self, bullet):
         return bullet.get_map_position()[0] > self.__size.x or bullet.get_map_position()[1] > self.__size.y or \
@@ -196,6 +217,9 @@ class Map:
 
     def get_bullets(self):
         return self.__bullets
+
+    def get_grenades(self):
+        return self.__grenades
 
     def get_first_aid_kits(self):
         return self.__first_aid_kits
@@ -258,6 +282,9 @@ class Map:
     def get_ammo_image(self):
         return self.__ammo_image
 
+    def get_grenade_image(self):
+        return self.__grenade_image
+
     def keep_no_monsters(self):
         no_needed_monsters = self.__min_no_monsters - len(self.__monsters)
         if no_needed_monsters > 0:
@@ -293,26 +320,20 @@ class Map:
         """bullet hits monster"""
         for bullet in self.__bullets:
             for monster in self.__monsters:
-                if get_distance(monster, bullet) < bullet_h + monster_h:
-                    self.__bullets.remove(bullet)
-                    monster.hurt(time())
+                if self.monster_bullet_collision(monster, bullet, "b"):
+                    break
 
-                    if monster.get_hp() == 0:
-                        r = randint(0, 40)
-                        if r == 0:
-                            """drops first aid kit"""
-                            shift = Monster.get_size().x // 2
-                            pos = Vector2(monster.get_map_position().x + shift, monster.get_map_position().y + shift)
-                            self.__first_aid_kits.append(FirstAidKit(pos))
-                        elif r in range(1, 8):
+        """grenades explode (time)"""
+        now = time()
+        grenade_time_to_explode = 2
+        for grenade in self.__grenades:
+            if now - grenade.get_time() >= grenade_time_to_explode:
+                self.grenade_explode(grenade)
 
-                            """drops ammo pack"""
-                            shift = monster.get_size().x // 2
-                            pos = Vector2(monster.get_map_position().x + shift, monster.get_map_position().y + shift)
-                            self.__ammo_packs.append(AmmoPack(pos))
-
-                        self.__monsters.remove(monster)
-                        self.score_point()
+        """grenades hit monster"""
+        for grenade in self.__grenades:
+            for monster in self.__monsters:
+                if self.monster_bullet_collision(monster, grenade, "g"):
                     break
 
         """monster attacks hero"""
@@ -322,6 +343,49 @@ class Map:
 
                     monster.attack()
                     self.__hero.hurt()
+
+    def monster_bullet_collision(self, monster, bullet, weapon_type):
+        bullet_h = Bullet.get_image().get_height() * 2 / 5
+        monster_h = Monster.get_image().get_height() * 2 / 5
+        grenade_h = Grenade.get_image().get_height() * 2 / 5
+        if weapon_type == "b":
+            h = bullet_h
+        elif weapon_type == "g":
+            h = grenade_h
+        if get_distance(monster, bullet) < h + monster_h:
+            if weapon_type == "b":
+                self.__bullets.remove(bullet)
+            elif weapon_type == "g":
+                self.grenade_explode(bullet)
+
+            monster.hurt(time())
+
+            if monster.get_hp() == 0:
+                r = randint(0, 40)
+                if r == 0:
+                    """drops first aid kit"""
+                    shift = Monster.get_size().x // 2
+                    pos = Vector2(monster.get_map_position().x + shift, monster.get_map_position().y + shift)
+                    self.__first_aid_kits.append(FirstAidKit(pos))
+                elif r in range(1, 8):
+
+                    """drops ammo pack"""
+                    shift = monster.get_size().x // 2
+                    pos = Vector2(monster.get_map_position().x + shift, monster.get_map_position().y + shift)
+                    self.__ammo_packs.append(AmmoPack(pos))
+
+                self.__monsters.remove(monster)
+                self.score_point()
+            return True
+        return False
+
+    def grenade_explode(self, grenade):
+        pos = grenade.get_map_position()
+        ang = grenade.get_angle()
+        self.__grenades.remove(grenade)
+
+        for i in range(8):
+            self.__bullets.append(Bullet(pos, ang + (i+1)*45, Vector2(0,0)))
 
     def get_reload_image(self):
         return self.__reload_image

@@ -14,6 +14,7 @@ class Hero:
         self.__screen_position = Vector2(screen_size.x / 2 - self.get_size().x / 2,
                                          screen_size.y / 2 - self.get_size().y / 2)
         self.__bullets_in_the_chamber = 8
+        self.__grenades_in_pocket = 3
         self.__no_ammo_packs = 20
         self.__max_hp = 5
         self.__hp = 5
@@ -56,6 +57,12 @@ class Hero:
 
     def set_no_bullets_in_the_chamber(self, x):
         self.__bullets_in_the_chamber = x
+
+    def get_no_grenades_in_pocket(self):
+        return self.__grenades_in_pocket
+
+    def set_no_grenades_in_pocket(self, x):
+        self.__grenades_in_pocket = x
 
     def get_no_ammo_packs(self):
         return self.__no_ammo_packs
