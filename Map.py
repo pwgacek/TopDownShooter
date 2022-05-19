@@ -44,8 +44,8 @@ class Map:
         self.__shell_image = pygame.image.load("assets/shotgun_shell.png")
         self.__reload_image = pygame.image.load("assets/reload.png")
         self.__ammo_image = pygame.image.load("assets/ammo_pack2.png")
-        self.__grenades_image = pygame.image.load("assets/many_grenades.png")
-        self.__shotgun_shells_image = pygame.image.load("assets/shotgun_shells.png")
+        self.__grenades_image = pygame.image.load("assets/many_granadesv2.png")
+        self.__shotgun_shells_image = pygame.image.load("assets/shotgun_shellsv2.png")
         self.__reload_angle = 0
         self.__reload_time = 0
         self.__borders = generate_borders(self.__chunk_size,
