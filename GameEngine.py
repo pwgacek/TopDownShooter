@@ -54,7 +54,7 @@ class GameEngine:
                     if pistol and self.__map.get_hero().get_no_bullets_in_the_chamber() > 0:
                         """shoot only with left button"""
                         if event.button == 1:
-                            self.__map.add_bullet()
+                            self.__map.add_bullet(1)
 
                     elif grenade and self.__map.get_hero().get_no_grenades_in_pocket() > 0:
                         """shoot only with left button"""
@@ -64,7 +64,7 @@ class GameEngine:
                     elif shotgun and self.__map.get_hero().get_no_shells_in_chamber() > 0:
                         """shoot only with left button"""
                         if event.button == 1:
-                            self.__map.shotgun_shot()
+                            self.__map.shotgun_shot(1)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 4:
@@ -81,8 +81,6 @@ class GameEngine:
                             pistol, grenade, shotgun = True, False, False
                         elif shotgun:
                             pistol, grenade, shotgun = False, True, False
-
-
 
                 if event.type == pygame.KEYDOWN:
 

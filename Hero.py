@@ -116,8 +116,8 @@ class Hero:
     def get_no_shotgun_shells(self):
         return self.__no_shotgun_shells_packs * 4 + self.__shotgun_shells_in_chamber
 
-    def hurt(self):
-        self.__hp -= 1
+    def hurt(self, value):
+        self.__hp -= value
 
     def get_hp(self):
         return self.__hp

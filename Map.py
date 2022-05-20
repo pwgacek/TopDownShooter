@@ -169,7 +169,7 @@ class Map:
     def get_hero(self):
         return self.__hero
 
-    def add_bullet(self):
+    def add_bullet(self, damage):
         self.__hero.set_no_bullets_in_the_chamber(self.__hero.get_no_bullets_in_the_chamber() - 1)
 
         a = self.__hero.get_map_position().x
@@ -178,9 +178,9 @@ class Map:
         map_position = Vector2(a, b)
         angle = self.__hero.get_angle() + 90
 
-        self.__bullets.append(Bullet(map_position, angle, self.__hero.get_size()))
+        self.__bullets.append(Bullet(map_position, angle, self.__hero.get_size(), damage))
 
-    def shotgun_shot(self):
+    def shotgun_shot(self, damage):
         self.__hero.set_no_shells_in_chamber(self.__hero.get_no_shells_in_chamber() - 1)
 
         a = self.__hero.get_map_position().x
@@ -190,7 +190,7 @@ class Map:
         angle = self.__hero.get_angle() + 90
 
         for i in range(4):
-            self.__bullets.append(Bullet(map_position, angle-15 + i*10, self.__hero.get_size()))
+            self.__bullets.append(Bullet(map_position, angle-15 + i*10, self.__hero.get_size(), damage))
 
     def add_grenade(self):
         self.__hero.set_no_grenades_in_pocket(self.__hero.get_no_grenades_in_pocket() - 1)
@@ -356,12 +356,12 @@ class Map:
                 if monster.get_last_attack() == 0 or monster.get_last_attack() + 1 < time():
 
                     monster.attack()
-                    self.__hero.hurt()
+                    self.__hero.hurt(1)
                     
         for bullet in self.__bullets:
             if get_distance(self.__hero, bullet) < bullet_h + hero_h:
                 self.__bullets.remove(bullet)
-                self.__hero.hurt()
+                self.__hero.hurt(bullet.get_damage())
 
     def monster_bullet_collision(self, monster, bullet, weapon_type):
         bullet_h = Bullet.get_image().get_height() * 2 / 5
@@ -377,9 +377,9 @@ class Map:
             elif weapon_type == "g":
                 self.grenade_explode(bullet)
 
-            monster.hurt(time())
+            monster.hurt(time(), bullet.get_damage())
 
-            if monster.get_hp() == 0:
+            if monster.get_hp() <= 0:
                 dropped_item = monster.drop_item()
                 if dropped_item is not None:
                     self.__dropped_items.append(dropped_item)
@@ -395,7 +395,7 @@ class Map:
         self.__grenades.remove(grenade)
 
         for i in range(16):
-            self.__bullets.append(Bullet(pos, ang + (i+1)*22.5, Vector2(0,0)))
+            self.__bullets.append(Bullet(pos, ang + (i+1)*22.5, Vector2(0, 0), 4))
 
     def get_reload_image(self):
         return self.__reload_image
