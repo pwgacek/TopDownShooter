@@ -367,6 +367,11 @@ class Map:
 
                     monster.attack()
                     self.__hero.hurt()
+                    
+        for bullet in self.__bullets:
+            if get_distance(self.__hero, bullet) < bullet_h + hero_h:
+                self.__bullets.remove(bullet)
+                self.__hero.hurt()
 
     def monster_bullet_collision(self, monster, bullet, weapon_type):
         bullet_h = Bullet.get_image().get_height() * 2 / 5
