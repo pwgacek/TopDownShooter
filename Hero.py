@@ -1,7 +1,7 @@
 import math
 import pygame
 from pygame.math import Vector2
-
+from DroppedItem import DroppedItemType
 
 class Hero:
 
@@ -17,8 +17,8 @@ class Hero:
         self.__grenades_in_pocket = 3
         self.__shotgun_shells_in_chamber = 4
         self.__no_ammo_packs = 20
-        self.__no_grenade_packs = 20
-        self.__no_shotgun_shells_packs = 20
+        self.__no_grenade_packs = 3
+        self.__no_shotgun_shells_packs = 10
         self.__max_hp = 5
         self.__hp = 5
 
@@ -42,6 +42,16 @@ class Hero:
         rot_rect.center = rot_image.get_rect().center
         rot_image = rot_image.subsurface(rot_rect).copy()
         return rot_image
+
+    def pick_up_dropped_item(self, item):
+        if item.get_type() == DroppedItemType.FirstAidKit:
+            self.__hp = self.__max_hp
+        elif item.get_type() == DroppedItemType.AmmoPack:
+            self.change_no_ammo_packs(2)
+        elif item.get_type() == DroppedItemType.ShotgunShells:
+            self.change_no_shotgun_packs(2)
+        elif item.get_type() == DroppedItemType.Grenades:
+            self.change_no_grenades_packs(1)
 
     def get_image(self):
         return self.__image
