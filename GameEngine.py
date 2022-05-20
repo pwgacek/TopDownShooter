@@ -3,7 +3,6 @@ from time import time
 import pygame
 from pygame.math import Vector2
 
-from FirstAidKit import FirstAidKit
 from Map import Map
 
 
@@ -64,8 +63,16 @@ class GameEngine:
                 if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_r:
-                        if self.__map.get_hero().get_no_ammo_packs() > 0:
-                            self.__map.set_reload_time(time())
+                        if pistol:
+                            if self.__map.get_hero().get_no_ammo_packs() > 0:
+                                self.__map.set_reload_time(time())
+                        if grenade:
+                            if self.__map.get_hero().get_no_grenades_packs() > 0:
+                                self.__map.set_reload_time(time())
+
+                        if shotgun:
+                            if self.__map.get_hero().get_no_shotgun_packs() > 0:
+                                self.__map.set_reload_time(time())
 
                     if event.key == pygame.K_3:
                         pistol = False
@@ -157,15 +164,10 @@ class GameEngine:
         self.__screen.blit(self.__map.get_grassland(), Vector2(0, 0),
                            pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
 
-        """show first aid kits"""
-        for fak in self.__map.get_first_aid_kits():
-            if self.__map.is_on_screen(fak, self.__map.get_camera_position()):
-                self.__screen.blit(fak.get_image(), fak.get_screen_position(self.__map.get_camera_position()))
-
-        """show ammo packs"""
-        for ap in self.__map.get_ammo_packs():
-            if self.__map.is_on_screen(ap, self.__map.get_camera_position()):
-                self.__screen.blit(ap.get_image(), ap.get_screen_position(self.__map.get_camera_position()))
+        """show dropped items"""
+        for item in self.__map.get_dropped_items():
+            if self.__map.is_on_screen(item, self.__map.get_camera_position()):
+                self.__screen.blit(item.get_image(), item.get_screen_position(self.__map.get_camera_position()))
 
         """shows hero on the screen"""
         self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())

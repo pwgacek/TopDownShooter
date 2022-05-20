@@ -4,6 +4,8 @@ import pygame
 from pygame.math import Vector2
 from time import time
 from random import randint
+from DroppedItem import DroppedItem
+from DroppedItem import DroppedItemType
 
 
 def generate_images(image):
@@ -96,3 +98,19 @@ class Monster:
     @classmethod
     def get_size(cls):
         return cls.__size
+
+    def drop_item(self):
+        shift = Monster.get_size().x // 2
+        pos = Vector2(self.get_map_position().x + shift, self.get_map_position().y + shift)
+        r = randint(0, 40)
+        item = None
+        if r == 0:
+            item = DroppedItem(pos, DroppedItemType.FirstAidKit)
+        elif r < 8:
+            item = DroppedItem(pos, DroppedItemType.AmmoPack)
+        elif r < 11:
+            item = DroppedItem(pos, DroppedItemType.ShotgunShells)
+        elif r < 13:
+            item = DroppedItem(pos, DroppedItemType.Grenades)
+
+        return item

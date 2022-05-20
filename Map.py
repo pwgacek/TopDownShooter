@@ -5,12 +5,10 @@ from time import time
 import pygame
 from pygame.math import Vector2
 
-from AmmoPack import AmmoPack
 from Bullet import Bullet
 from Hero import Hero
 from MapGenerator import generate_array, generate_borders, generate_grass, generate_map_elements
 from Monster import Monster
-from FirstAidKit import FirstAidKit
 from Grenade import Grenade
 
 
@@ -37,14 +35,14 @@ class Map:
         self.__grenades = list()
         # self.__font = pygame.font.SysFont('Bradley Hand ITC', 50, bold=pygame.font.Font.bold)
         self.__monsters = list()
-        self.__first_aid_kits = list()
-        self.__ammo_packs = list()
+        self.__dropped_items = list()
+
         self.__bullet_image = pygame.image.load("assets/ammo1.png")
         self.__grenade_image = pygame.image.load("assets/grenade_ico.png")
         self.__shell_image = pygame.image.load("assets/shotgun_shell.png")
         self.__reload_image = pygame.image.load("assets/reload.png")
         self.__ammo_image = pygame.image.load("assets/ammo_pack2.png")
-        self.__grenades_image = pygame.image.load("assets/many_granadesv2.png")
+        self.__grenades_image = pygame.image.load("assets/many_granedesv2.png")
         self.__shotgun_shells_image = pygame.image.load("assets/shotgun_shellsv2.png")
         self.__reload_angle = 0
         self.__reload_time = 0
@@ -236,11 +234,8 @@ class Map:
     def get_grenades(self):
         return self.__grenades
 
-    def get_first_aid_kits(self):
-        return self.__first_aid_kits
-
-    def get_ammo_packs(self):
-        return self.__ammo_packs
+    def get_dropped_items(self):
+        return self.__dropped_items
 
     # def get_font(self):
     #     return self.__font
@@ -329,17 +324,12 @@ class Map:
         monster_h = Monster.get_image().get_height() * 2 / 5
         hero_h = self.__hero.get_image().get_height() * 2 / 5
 
-        """hero grabs first aid kit"""
+        """hero grabs dropped item"""
         dist = self.__hero.get_image().get_width() // 2
-        for fak in self.__first_aid_kits:
-            if get_distance(self.__hero, fak) < dist:
-                self.__hero.heal()
-                self.__first_aid_kits.remove(fak)
-        """hero grabs ammo pack"""
-        for ap in self.__ammo_packs:
-            if get_distance(self.__hero, ap) < dist:
-                self.__hero.change_no_ammo_packs(2)
-                self.__ammo_packs.remove(ap)
+        for item in self.__dropped_items:
+            if get_distance(self.__hero, item) < dist:
+                self.__hero.pick_up_dropped_item(item)
+                self.__dropped_items.remove(item)
 
         """bullet hits monster"""
         for bullet in self.__bullets:
@@ -385,18 +375,9 @@ class Map:
             monster.hurt(time())
 
             if monster.get_hp() == 0:
-                r = randint(0, 40)
-                if r == 0:
-                    """drops first aid kit"""
-                    shift = Monster.get_size().x // 2
-                    pos = Vector2(monster.get_map_position().x + shift, monster.get_map_position().y + shift)
-                    self.__first_aid_kits.append(FirstAidKit(pos))
-                elif r in range(1, 8):
-
-                    """drops ammo pack"""
-                    shift = monster.get_size().x // 2
-                    pos = Vector2(monster.get_map_position().x + shift, monster.get_map_position().y + shift)
-                    self.__ammo_packs.append(AmmoPack(pos))
+                dropped_item = monster.drop_item()
+                if dropped_item is not None:
+                    self.__dropped_items.append(dropped_item)
 
                 self.__monsters.remove(monster)
                 self.score_point()
