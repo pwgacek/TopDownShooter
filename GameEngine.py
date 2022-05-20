@@ -61,6 +61,24 @@ class GameEngine:
                         if event.button == 1:
                             self.__map.shotgun_shot()
 
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 4:
+                        if pistol:
+                            pistol, grenade, shotgun = False, True, False
+                        elif grenade:
+                            pistol, grenade, shotgun = False, False, True
+                        elif shotgun:
+                            pistol, grenade, shotgun = True, False, False
+                    elif event.button == 5:
+                        if pistol:
+                            pistol, grenade, shotgun = False, False, True
+                        elif grenade:
+                            pistol, grenade, shotgun = True, False, False
+                        elif shotgun:
+                            pistol, grenade, shotgun = False, True, False
+
+
+
                 if event.type == pygame.KEYDOWN:
 
                     if event.key == pygame.K_r:
