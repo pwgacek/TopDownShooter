@@ -203,12 +203,12 @@ class Map:
 
         self.__grenades.append(Grenade(map_position, angle, self.__hero.get_size()))
 
-    def move_bullets_and_grenades(self):
+    def move_bullets_and_grenades(self, move_speed):
         for bullet in self.__bullets:
-            bullet.move()
+            bullet.move(move_speed)
 
         for grenade in self.__grenades:
-            grenade.move()
+            grenade.move(move_speed / 2)
 
         self.remove_bullets_and_grenades()
 
@@ -389,8 +389,8 @@ class Map:
         ang = grenade.get_angle()
         self.__grenades.remove(grenade)
 
-        for i in range(8):
-            self.__bullets.append(Bullet(pos, ang + (i+1)*45, Vector2(0,0)))
+        for i in range(16):
+            self.__bullets.append(Bullet(pos, ang + (i+1)*22.5, Vector2(0,0)))
 
     def get_reload_image(self):
         return self.__reload_image
