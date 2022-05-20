@@ -15,6 +15,8 @@ class GameEngine:
         self.__map = Map(Vector2(self.__screen.get_size()))
         self.__font = pygame.font.SysFont('arial', 32, bold=pygame.font.Font.bold)
         self.__font2 = pygame.font.SysFont('arial', 44, bold=pygame.font.Font.bold)
+        self.__dt = 0.1
+
         pygame.display.set_caption("Top-Down Shooter")
 
     def run(self):
@@ -32,8 +34,12 @@ class GameEngine:
         """set true if key is pressed"""
         move_direction_flags = {"up": False, "down": False, "left": False, "right": False}
 
+        last_time = time() - 0.1
+
         """main game loop"""
         while running and hero_alive:
+            self.__dt = time() - last_time
+            last_time = time()
 
             for event in pygame.event.get():
 
@@ -133,7 +139,7 @@ class GameEngine:
                 self.__map.increase_min_no_monsters(1)
                 delta = 0
             """move all map elements"""
-            self.move_map_elements(move_direction_flags, fps)
+            self.move_map_elements(move_direction_flags)
             self.__map.check_collisions()
             hero_alive = self.__map.get_hero().get_hp() > 0
             """clears screen"""
@@ -142,7 +148,7 @@ class GameEngine:
             self.draw_map(self.__map.get_camera_position(), pistol, grenade, shotgun)
 
             pygame.display.update()
-            fps_clock.tick(fps)
+            fps_clock.tick(int(fps/(1 + len(self.__map.get_monsters()) * 0.01)))
 
         """Game Over manu"""
         click = False
@@ -171,10 +177,10 @@ class GameEngine:
             pygame.display.update()
             fps_clock.tick(fps)
 
-    def move_map_elements(self, move_direction_flags, fps):
-        self.__map.move_hero(move_direction_flags, fps * 0.1)
-        self.__map.move_monsters(fps * 0.02)
-        self.__map.move_bullets_and_grenades()
+    def move_map_elements(self, move_direction_flags):
+        self.__map.move_hero(move_direction_flags, self.__dt * 325)
+        self.__map.move_monsters(self.__dt * 70)
+        self.__map.move_bullets_and_grenades(self.__dt * 937)
 
     def draw_map(self, camera_position, pistol, grenade, shotgun):
 
@@ -240,6 +246,12 @@ class GameEngine:
         "show score"
         score = self.__font.render("Score " + str(self.__map.get_score()), True, (255, 255, 255))
         self.__screen.blit(score, (640, 10))
+        """show fps"""
+        curren_fps = self.__font.render("fps:" + str(int(1.0 // self.__dt)), True, (255, 255, 255))
+        self.__screen.blit(curren_fps, (500, 10))
+        """show no_monsters"""
+        no_monsters = self.__font.render("m:" + str(len(self.__map.get_monsters())), True, (255, 255, 255))
+        self.__screen.blit(no_monsters, (400, 10))
         "show remaining ammo"
         x = ""
         if pistol:

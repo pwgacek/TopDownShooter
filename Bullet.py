@@ -16,9 +16,9 @@ class Bullet:
             map_position.y + hero_size.y / 2 - self.get_size().y / 2 - math.sin(
                 math.radians(angle - 14)) * 50)
 
-    def move(self):
+    def move(self, speed):
         """ moves current bullet on  map"""
-        speed = 15
+
         x1 = math.cos(math.radians(self.__angle))
         y1 = math.sin(math.radians(self.__angle))
         a = self.__map_position.x + x1 * speed

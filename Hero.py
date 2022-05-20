@@ -3,6 +3,7 @@ import pygame
 from pygame.math import Vector2
 from DroppedItem import DroppedItemType
 
+
 class Hero:
 
     def __init__(self, map_position, screen_size):
