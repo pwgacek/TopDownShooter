@@ -214,12 +214,12 @@ class Map:
 
     def remove_bullets_and_grenades(self):
         for i in self.__bullets:
-            if self.bullet_not_in_bounds(i) or self.__bullet_hit_map_element(i.get_map_position()):
+            if self.bullet_not_in_bounds(i):
                 self.__bullets.remove(i)
 
         for i in self.__grenades:
-            if self.bullet_not_in_bounds(i) or self.__bullet_hit_map_element(i.get_map_position()):
-                self.grenade_explode(i)
+            if self.bullet_not_in_bounds(i):
+                self.__grenades.remove(i)
 
     def bullet_not_in_bounds(self, bullet):
         return bullet.get_map_position()[0] > self.__size.x or bullet.get_map_position()[1] > self.__size.y or \
@@ -320,9 +320,10 @@ class Map:
         return self.__score
 
     def check_collisions(self):
-        bullet_h = Bullet.get_image().get_height() * 2 / 5
-        monster_h = Monster.get_image().get_height() * 2 / 5
-        hero_h = self.__hero.get_image().get_height() * 2 / 5
+        monster_h = Monster.get_size().y * 2 / 5
+        hero_h = self.__hero.get_size().y * 2 / 5
+        bullet_h = Bullet.get_size().y * 2 / 5
+        grenade_h = Grenade.get_size().y * 2 / 5
 
         """hero grabs dropped item"""
         dist = self.__hero.get_image().get_width() // 2
@@ -331,11 +332,23 @@ class Map:
                 self.__hero.pick_up_dropped_item(item)
                 self.__dropped_items.remove(item)
 
-        """bullet hits monster"""
+        """bullet hits monster or tree"""
         for bullet in self.__bullets:
-            for monster in self.__monsters:
-                if self.monster_bullet_collision(monster, bullet, "b"):
-                    break
+            if self.__bullet_hit_map_element(bullet.get_map_position()):
+                self.__bullets.remove(bullet)
+            else:
+                for monster in self.__monsters:
+                    if get_distance(monster, bullet) < bullet_h + monster_h:
+                        self.__bullets.remove(bullet)
+                        monster.hurt(time(), bullet.get_damage())
+                        if monster.get_hp() <= 0:
+                            dropped_item = monster.drop_item()
+                            if dropped_item is not None:
+                                self.__dropped_items.append(dropped_item)
+
+                            self.__monsters.remove(monster)
+                            self.score_point()
+                        break
 
         """grenades explode (time)"""
         now = time()
@@ -344,11 +357,15 @@ class Map:
             if now - grenade.get_time() >= grenade_time_to_explode:
                 self.grenade_explode(grenade)
 
-        """grenades hit monster"""
+        """grenade hits monster or tree"""
         for grenade in self.__grenades:
-            for monster in self.__monsters:
-                if self.monster_bullet_collision(monster, grenade, "g"):
-                    break
+            if self.__bullet_hit_map_element(grenade.get_map_position()):
+                self.grenade_explode(grenade)
+            else:
+                for monster in self.__monsters:
+                    if get_distance(monster, grenade) < grenade_h + monster_h:
+                        self.grenade_explode(grenade)
+                        break
 
         """monster attacks hero"""
         for monster in self.__monsters:
@@ -357,37 +374,11 @@ class Map:
 
                     monster.attack()
                     self.__hero.hurt(1)
-                    
+        """bullet hits hero"""
         for bullet in self.__bullets:
             if get_distance(self.__hero, bullet) < bullet_h + hero_h:
                 self.__bullets.remove(bullet)
                 self.__hero.hurt(bullet.get_damage())
-
-    def monster_bullet_collision(self, monster, bullet, weapon_type):
-        bullet_h = Bullet.get_image().get_height() * 2 / 5
-        monster_h = Monster.get_image().get_height() * 2 / 5
-        grenade_h = Grenade.get_image().get_height() * 2 / 5
-        if weapon_type == "b":
-            h = bullet_h
-        elif weapon_type == "g":
-            h = grenade_h
-        if get_distance(monster, bullet) < h + monster_h:
-            if weapon_type == "b":
-                self.__bullets.remove(bullet)
-            elif weapon_type == "g":
-                self.grenade_explode(bullet)
-
-            monster.hurt(time(), bullet.get_damage())
-
-            if monster.get_hp() <= 0:
-                dropped_item = monster.drop_item()
-                if dropped_item is not None:
-                    self.__dropped_items.append(dropped_item)
-
-                self.__monsters.remove(monster)
-                self.score_point()
-            return True
-        return False
 
     def grenade_explode(self, grenade):
         pos = grenade.get_map_position()
