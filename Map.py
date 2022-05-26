@@ -31,9 +31,9 @@ class Map:
         self.__screen_size = screen_size
         self.__array = generate_array(30, self.__size.y, self.__size.y, self.__chunk_size, self.__screen_size)
         self.__hero = Hero(Vector2(self.__size.x / 2, self.__size.y / 2), self.__screen_size)
+
         self.__bullets = list()
         self.__grenades = list()
-        # self.__font = pygame.font.SysFont('Bradley Hand ITC', 50, bold=pygame.font.Font.bold)
         self.__monsters = list()
         self.__dropped_items = list()
 
@@ -85,32 +85,27 @@ class Map:
         """change position if possible"""
         if self.__hero_can_move_to(Vector2(destination_x, current_y)):
             self.__hero.get_map_position().x += change_x
+            current_x = destination_x
         if self.__hero_can_move_to(Vector2(current_x, destination_y)):
             self.__hero.get_map_position().y += change_y
 
         self.__hero.set_angle()
 
     def move_monsters(self, move_speed):
-        faster = move_speed
-        slower = move_speed * 0.3
         monster_freeze_time = 1
         max_distance = self.__hero.get_size().x / 2
         shift = Monster.get_size().x / 2
         near_monsters_pos = list()
         for monster in self.__monsters:
+            monster_move_speed = move_speed
             if get_distance(monster, self.__hero) > max_distance:
 
                 """monster moves slower after being hit"""
                 if monster.get_time() != 0:
                     if monster.get_time() + monster_freeze_time > time():
-                        move_speed = slower
+                        monster_move_speed = move_speed * 0.3
                     else:
                         monster.set_time()
-                else:
-                    move_speed = faster
-
-                monster_x = monster.get_map_position().x + shift
-                monster_y = monster.get_map_position().y + shift
 
                 near_monsters_pos.clear()
                 for other_monster in self.__monsters:
@@ -120,23 +115,23 @@ class Map:
                 """checks if monster can move in given direction"""
                 for a in [0, 30, -30, 60, -60, 87, -87]:
                     vector = monster.get_unit_vector(monster.get_angle() + a)
-                    x = monster_x + vector.x * move_speed * monster.get_speed_ratio()
-                    y = monster_y + vector.y * move_speed * monster.get_speed_ratio()
+                    x = monster.get_map_position().x + vector.x * monster_move_speed * monster.get_speed_ratio()
+                    y = monster.get_map_position().y + vector.y * monster_move_speed * monster.get_speed_ratio()
 
                     can_move = True
-                    if not self.__no_obstacles_for_monster(Vector2(x, y)):
+                    if not self.__no_obstacles_for_monster(Vector2(x + shift, y + shift)):
                         can_move = False
                     else:
                         for other_monster_pos in near_monsters_pos:
 
                             if math.dist(monster.get_map_position(), other_monster_pos) \
-                                    >= math.dist(Vector2(x - shift, y - shift), other_monster_pos):
+                                    >= math.dist(Vector2(x, y), other_monster_pos):
                                 can_move = False
                                 break
 
                     if can_move:
-                        monster.get_map_position().x = x - shift
-                        monster.get_map_position().y = y - shift
+                        monster.get_map_position().x = x
+                        monster.get_map_position().y = y
                         break
 
                 monster.set_angle(self.__hero)
