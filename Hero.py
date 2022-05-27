@@ -110,7 +110,7 @@ class Hero:
         elif weapon_type == "s":
             return self.__no_shotgun_shells_packs * 4 + self.__shotgun_shells_in_chamber
 
-    def get_no_granades(self):
+    def get_no_grenades(self):
         return self.__no_grenade_packs * 3 + self.__grenades_in_pocket
 
     def get_no_shotgun_shells(self):

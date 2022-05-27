@@ -106,11 +106,11 @@ class Monster:
         item = None
         if r == 0:
             item = DroppedItem(pos, DroppedItemType.FirstAidKit)
-        elif r < 8:
+        elif r < 7:
             item = DroppedItem(pos, DroppedItemType.AmmoPack)
-        elif r < 11:
+        elif r < 10:
             item = DroppedItem(pos, DroppedItemType.ShotgunShells)
-        elif r < 12:
+        elif r < 11:
             item = DroppedItem(pos, DroppedItemType.Grenades)
 
         return item
