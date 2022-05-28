@@ -4,6 +4,7 @@ import pygame
 from pygame.math import Vector2
 
 from Map import Map
+from ImageHandler import ImageHandler
 
 
 class GameEngine:
@@ -13,6 +14,7 @@ class GameEngine:
         self.__height = 600
         self.__screen = pygame.display.set_mode((self.__width, self.__height))
         self.__map = Map(Vector2(self.__screen.get_size()))
+        self.__image_handler = ImageHandler(self.__map.chunk_size, self.__map.size, self.__map.array)
         self.__font = pygame.font.SysFont('arial', 32, bold=pygame.font.Font.bold)
         self.__font2 = pygame.font.SysFont('arial', 44, bold=pygame.font.Font.bold)
         self.__dt = 0.1
@@ -29,7 +31,8 @@ class GameEngine:
         fps = 60
         fps_clock = pygame.time.Clock()
         monster_clock = pygame.time.Clock()
-        self.set_map(Map(Vector2(self.__screen.get_size())))
+        self.__map = Map(Vector2(self.__screen.get_size()))
+        self.__image_handler = ImageHandler(self.__map.chunk_size, self.__map.size, self.__map.array)
         delta = 0
         """set true if key is pressed"""
         move_direction_flags = {"up": False, "down": False, "left": False, "right": False}
@@ -47,21 +50,21 @@ class GameEngine:
                     running = False
                     game_over = False
 
-                if event.type == pygame.MOUSEBUTTONDOWN and self.__map.get_reload_time() == 0:
+                if event.type == pygame.MOUSEBUTTONDOWN and self.__image_handler.reload_time == 0:
                     """can shoot with all mouse buttons"""
                     # self.__map.add_bullet()
 
-                    if pistol and self.__map.get_hero().get_no_bullets_in_the_chamber() > 0:
+                    if pistol and self.__map.hero.get_no_bullets_in_the_chamber() > 0:
                         """shoot only with left button"""
                         if event.button == 1:
                             self.__map.add_bullet(1)
 
-                    elif grenade and self.__map.get_hero().get_no_grenades_in_pocket() > 0:
+                    elif grenade and self.__map.hero.get_no_grenades_in_pocket() > 0:
                         """shoot only with left button"""
                         if event.button == 1:
                             self.__map.add_grenade()
 
-                    elif shotgun and self.__map.get_hero().get_no_shells_in_chamber() > 0:
+                    elif shotgun and self.__map.hero.get_no_shells_in_chamber() > 0:
                         """shoot only with left button"""
                         if event.button == 1:
                             self.__map.shotgun_shot(1)
@@ -86,15 +89,15 @@ class GameEngine:
 
                     if event.key == pygame.K_r:
                         if pistol:
-                            if self.__map.get_hero().get_no_ammo_packs() > 0:
-                                self.__map.set_reload_time(time())
+                            if self.__map.hero.get_no_ammo_packs() > 0:
+                                self.__image_handler.reload_time = (time())
                         if grenade:
-                            if self.__map.get_hero().get_no_grenades_packs() > 0:
-                                self.__map.set_reload_time(time())
+                            if self.__map.hero.get_no_grenades_packs() > 0:
+                                self.__image_handler.reload_time = (time())
 
                         if shotgun:
-                            if self.__map.get_hero().get_no_shotgun_packs() > 0:
-                                self.__map.set_reload_time(time())
+                            if self.__map.hero.get_no_shotgun_packs() > 0:
+                                self.__image_handler.reload_time = (time())
 
                     if event.key == pygame.K_3:
                         pistol = False
@@ -133,20 +136,20 @@ class GameEngine:
 
             """increase number of monsters every 10 seconds"""
             delta += monster_clock.tick()
-            if delta > 10000:
+            if delta > len(self.__map.monsters) * 800:
                 self.__map.increase_min_no_monsters(1)
                 delta = 0
             """move all map elements"""
-            self.move_map_elements(move_direction_flags)
+            self.__move_map_elements(move_direction_flags)
             self.__map.check_collisions()
-            hero_alive = self.__map.get_hero().get_hp() > 0
+            hero_alive = self.__map.hero.hp > 0
             """clears screen"""
             self.__screen.fill((0, 102, 0))
             """draws  map elements and ammo """
-            self.draw_map(self.__map.get_camera_position(), pistol, grenade, shotgun)
+            self.__draw_all(self.__map.camera_position, pistol, grenade, shotgun)
 
             pygame.display.update()
-            fps_clock.tick(int(fps/(1 + len(self.__map.get_monsters()) * 0.01)))
+            fps_clock.tick(int(fps / (1 + len(self.__map.monsters) * 0.01)))
 
         """Game Over manu"""
         click = False
@@ -175,126 +178,120 @@ class GameEngine:
             pygame.display.update()
             fps_clock.tick(fps)
 
-    def move_map_elements(self, move_direction_flags):
-        self.__map.move_hero(move_direction_flags, self.__dt * 325)
-        self.__map.move_monsters(self.__dt * 70)
-        self.__map.move_bullets_and_grenades(self.__dt * 937)
+    def __move_map_elements(self, move_direction_flags):
+        self.__map.move_hero(move_direction_flags, self.__dt * 300)
+        self.__map.move_monsters(self.__dt * 75)
+        self.__map.move_bullets_and_grenades(self.__dt * 1000)
 
-    def draw_map(self, camera_position, pistol, grenade, shotgun):
+    def __draw_all(self, camera_position, pistol, grenade, shotgun):
 
         """show grass"""
-        self.__screen.blit(self.__map.get_grassland(), Vector2(0, 0),
+        self.__screen.blit(self.__image_handler.grassland_image, Vector2(0, 0),
                            pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
 
         """show dropped items"""
-        for item in self.__map.get_dropped_items():
-            if self.__map.is_on_screen(item, self.__map.get_camera_position()):
-                self.__screen.blit(item.get_image(), item.get_screen_position(self.__map.get_camera_position()))
+        for item in self.__map.dropped_items:
+            if self.__map.is_on_screen(item):
+                self.__screen.blit(item.image, self.__map.get_screen_position(item))
 
         """shows hero on the screen"""
-        self.__screen.blit(self.__map.get_hero().get_rotated_image(), self.__map.get_hero().get_screen_position())
+        self.__screen.blit(self.__map.hero.rotated_image, self.__map.hero.screen_position)
 
         """shows monsters on the screen"""
-        for monster in self.__map.get_monsters():
-            if self.__map.is_on_screen(monster, self.__map.get_camera_position()):
-                self.__screen.blit(monster.get_rotated_image(),
-                                   monster.get_screen_position(self.__map.get_camera_position()))
+        for monster in self.__map.monsters:
+            if self.__map.is_on_screen(monster):
+                self.__screen.blit(monster.rotated_image, self.__map.get_screen_position(monster))
 
         """shows bullets and grenades, their movement and removal"""
 
-        for bullet in self.__map.get_bullets():
-            if self.__map.is_on_screen(bullet, self.__map.get_camera_position()):
-                self.__screen.blit(pygame.transform.rotate(pygame.image.load("assets/bullet.png"),
-                                                           bullet.get_angle() - 90),
-                                   bullet.get_screen_position(self.__map.get_camera_position()))
+        for bullet in self.__map.bullets:
+            if self.__map.is_on_screen(bullet):
+                self.__screen.blit(pygame.transform.rotate(pygame.image.load("assets/bullet.png"), bullet.angle - 90),
+                                   self.__map.get_screen_position(bullet))
 
-        for grenadee in self.__map.get_grenades():
-            if self.__map.is_on_screen(grenadee, self.__map.get_camera_position()):
-                self.__screen.blit(pygame.transform.rotate(pygame.image.load("assets/grenade.png"),
-                                                           grenadee.get_angle() - 90),
-                                   grenadee.get_screen_position(self.__map.get_camera_position()))
+        for grenade in self.__map.grenades:
+            if self.__map.is_on_screen(grenade):
+                self.__screen.blit(pygame.transform.rotate(pygame.image.load("assets/grenade.png"), grenade.angle - 90),
+                                   self.__map.get_screen_position(grenade))
 
         """shows forest on the screen"""
-        self.__screen.blit(self.__map.get_borders(), Vector2(0, 0),
+        self.__screen.blit(self.__image_handler.borders_image, Vector2(0, 0),
                            pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
 
         """show map elements on the screen"""
-        self.__screen.blit(self.__map.get_map_elements(), Vector2(0, 0),
+        self.__screen.blit(self.__image_handler.map_elements_image, Vector2(0, 0),
                            pygame.Rect(camera_position.x, camera_position.y, self.__width, self.__height))
 
         "draw hero health"
-        pygame.draw.rect(self.__screen, (255, 0, 0), (20, 20, self.__map.get_hero().get_max_hp() * 35, 20))
-        pygame.draw.rect(self.__screen, (0, 255, 0), (20, 20, self.__map.get_hero().get_hp() * 35, 20))
+        pygame.draw.rect(self.__screen, (255, 0, 0), (20, 20, self.__map.hero.max_hp * 35, 20))
+        pygame.draw.rect(self.__screen, (0, 255, 0), (20, 20, self.__map.hero.hp * 35, 20))
 
         "show remaining ammo in chamber"
         ammo_shift = 20
         if pistol:
-            for i in range(self.__map.get_hero().get_no_bullets_in_the_chamber()):
-                self.__screen.blit(self.__map.get_bullet_image(), (ammo_shift, 520))
-                ammo_shift += self.__map.get_bullet_image().get_size()[0]
+            for i in range(self.__map.hero.get_no_bullets_in_the_chamber()):
+                self.__screen.blit(self.__image_handler.bullet_image, (ammo_shift, 520))
+                ammo_shift += self.__image_handler.bullet_image.get_size()[0]
         elif grenade:
-            for i in range(self.__map.get_hero().get_no_grenades_in_pocket()):
-                self.__screen.blit(self.__map.get_grenade_image(), (ammo_shift, 520))
-                ammo_shift += self.__map.get_grenade_image().get_size()[0]
+            for i in range(self.__map.hero.get_no_grenades_in_pocket()):
+                self.__screen.blit(self.__image_handler.grenade_image, (ammo_shift, 520))
+                ammo_shift += self.__image_handler.grenade_image.get_size()[0]
         elif shotgun:
-            for i in range(self.__map.get_hero().get_no_shells_in_chamber()):
-                self.__screen.blit(self.__map.get_shell_image(), (ammo_shift, 500))
-                ammo_shift += self.__map.get_shell_image().get_size()[0]
+            for i in range(self.__map.hero.get_no_shells_in_chamber()):
+                self.__screen.blit(self.__image_handler.shell_image, (ammo_shift, 500))
+                ammo_shift += self.__image_handler.shell_image.get_size()[0]
 
         "show score"
-        score = self.__font.render("Score " + str(self.__map.get_score()), True, (255, 255, 255))
+        score = self.__font.render("Score " + str(self.__map.score), True, (255, 255, 255))
         self.__screen.blit(score, (640, 10))
         """show fps"""
         curren_fps = self.__font.render("fps:" + str(int(1.0 // self.__dt)), True, (255, 255, 255))
         self.__screen.blit(curren_fps, (500, 10))
         """show no_monsters"""
-        no_monsters = self.__font.render("m:" + str(len(self.__map.get_monsters())), True, (255, 255, 255))
+        no_monsters = self.__font.render("m:" + str(len(self.__map.monsters)), True, (255, 255, 255))
         self.__screen.blit(no_monsters, (400, 10))
         "show remaining ammo"
         x = ""
         if pistol:
             x = "p"
-            self.__screen.blit(self.__map.get_ammo_image(), (660, 510))
+            self.__screen.blit(self.__image_handler.ammo_image, (660, 510))
         elif grenade:
             x = "g"
-            self.__screen.blit(self.__map.get_grenades_image(), (600, 510))
+            self.__screen.blit(self.__image_handler.grenades_image, (600, 510))
         elif shotgun:
             x = "s"
-            self.__screen.blit(self.__map.get_shotgun_shells_image(), (640, 510))
+            self.__screen.blit(self.__image_handler.shotgun_shells_image, (640, 510))
 
-        ammo = self.__font2.render(str(self.__map.get_hero().get_no_ammo(x)), True, (255, 255, 255))
+        ammo = self.__font2.render(str(self.__map.hero.get_no_ammo(x)), True, (255, 255, 255))
         self.__screen.blit(ammo, (715, 530))
 
         "show reloading img"
-        if self.__map.get_reload_time() != 0 and self.__map.get_reload_time() + 1 < time():
-            no_ammo_packs = self.__map.get_hero().get_no_ammo_packs()
-            no_grenades = self.__map.get_hero().get_no_grenades_packs()
-            no_shotgun = self.__map.get_hero().get_no_shotgun_packs()
+        if self.__image_handler.reload_time != 0 and self.__image_handler.reload_time + 1 < time():
+            no_ammo_packs = self.__map.hero.get_no_ammo_packs()
+            no_grenades = self.__map.hero.get_no_grenades_packs()
+            no_shotgun = self.__map.hero.get_no_shotgun_packs()
             if no_ammo_packs > 0 and pistol:
-                self.__map.get_hero().change_no_ammo_packs(-1)
-                self.__map.get_hero().set_no_bullets_in_the_chamber(8)
-                self.__map.set_reload_time(0)
+                self.__map.hero.change_no_ammo_packs(-1)
+                self.__map.hero.set_no_bullets_in_the_chamber(8)
+                self.__image_handler.reload_time = 0
 
             if no_grenades > 0 and grenade:
-                self.__map.get_hero().change_no_grenades_packs(-1)
-                self.__map.get_hero().set_no_grenades_in_pocket(3)
-                self.__map.set_reload_time(0)
+                self.__map.hero.change_no_grenades_packs(-1)
+                self.__map.hero.set_no_grenades_in_pocket(3)
+                self.__image_handler.reload_time = 0
 
             if no_shotgun > 0 and shotgun:
-                self.__map.get_hero().change_no_shotgun_packs(-1)
-                self.__map.get_hero().set_no_shells_in_chamber(4)
-                self.__map.set_reload_time(0)
+                self.__map.hero.change_no_shotgun_packs(-1)
+                self.__map.hero.set_no_shells_in_chamber(4)
+                self.__image_handler.reload_time = 0
 
-        elif self.__map.get_reload_time() != 0 and self.__map.get_reload_time() + 1 > time():
-            self.__screen.blit(self.__map.get_rotated_reload_image(), (370, 529))
-
-    def set_map(self, map1):
-        self.__map = map1
+        elif self.__image_handler.reload_time != 0 and self.__image_handler.reload_time + 1 > time():
+            self.__screen.blit(self.__image_handler.rotated_reload_image, (370, 529))
 
     def game_over_screen(self, button1):
         over = pygame.font.SysFont('arial', 80, bold=pygame.font.Font.bold).render("Game Over", True, (255, 255, 255))
         self.__screen.blit(over, (190, 100))
-        score = pygame.font.SysFont('arial', 40).render("Your score " + str(self.__map.get_score()),
+        score = pygame.font.SysFont('arial', 40).render("Your score " + str(self.__map.score),
                                                         True, (255, 255, 255))
         self.__screen.blit(score, (300, 250))
         pygame.draw.rect(self.__screen, (255, 0, 0), button1)

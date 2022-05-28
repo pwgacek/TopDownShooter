@@ -6,6 +6,7 @@ from PIL import Image, ImageDraw
 from math import atan2
 from random import randint
 from pygame import Vector2
+from Utils import get_rotated_image
 
 
 def __generate_vertexes(no_vertexes, height, width, x_space, y_space):
@@ -63,25 +64,13 @@ def __generate_vectors_coordinates(coordinates, min_coordinate, max_coordinate):
     return result
 
 
-def generate_array(no_vertexes, map_height, map_width, chunk_size, screen_size):
+def generate_array(no_vertexes,  map_width, map_height, chunk_size, screen_size):
     polygon = __generate_vertexes(no_vertexes, map_height / chunk_size, map_width / chunk_size,
-                                  (screen_size.x / chunk_size) / 2 + 3,
-                                  (screen_size.y / chunk_size) / 2 + 3)
+                                  (screen_size.x / chunk_size) / 2 + 3, (screen_size.y / chunk_size) / 2 + 3)
 
     img = Image.new('L', (int(map_width / chunk_size), int(map_height / chunk_size)), 0)
     ImageDraw.Draw(img).polygon(polygon, outline=1, fill=1)
     return np.array(img)
-
-
-def get_rotated_image(image, angle):
-    """ returns rotated  image while keeping its center and size"""
-
-    orig_rect = image.get_rect()
-    rot_image = pygame.transform.rotate(image, angle)
-    rot_rect = orig_rect.copy()
-    rot_rect.center = rot_image.get_rect().center
-    rot_image = rot_image.subsurface(rot_rect).copy()
-    return rot_image
 
 
 def generate_borders(chunk_size, map_size, array):
@@ -95,7 +84,7 @@ def generate_borders(chunk_size, map_size, array):
         for j in range(height):
             if array[i][j] == 0:
                 borders.blit(get_rotated_image(tree_image, random.randint(0, 359)),
-                                Vector2(i * chunk_size - shift, j * chunk_size - shift))
+                             Vector2(i * chunk_size - shift, j * chunk_size - shift))
 
     return borders
 
@@ -122,53 +111,48 @@ def generate_grass(chunk_size, map_size, array):
 
 
 def generate_map_elements(chunk_size, map_size, array):
-
     tree_image = pygame.image.load("assets/tree3.png")
     shift = (tree_image.get_size()[0] - chunk_size) / 2
 
-    big_tree = pygame.Surface((2*chunk_size + shift, 2*chunk_size + 2*shift), pygame.SRCALPHA)
-    """merging for trees into one big tree"""
+    big_tree = pygame.Surface((2 * chunk_size + shift, 2 * chunk_size + 2 * shift), pygame.SRCALPHA)
+    """merging four trees into one big tree"""
     big_tree.blit(get_rotated_image(tree_image, randint(0, 359)), Vector2(0, 0))
-    big_tree.blit(get_rotated_image(tree_image, randint(0, 359)), Vector2(chunk_size-shift, 0))
-    big_tree.blit(get_rotated_image(tree_image, randint(0, 359)), Vector2(0, chunk_size-shift))
-    big_tree.blit(get_rotated_image(tree_image, randint(0, 359)), Vector2(chunk_size-shift, chunk_size-shift))
+    big_tree.blit(get_rotated_image(tree_image, randint(0, 359)), Vector2(chunk_size - shift, 0))
+    big_tree.blit(get_rotated_image(tree_image, randint(0, 359)), Vector2(0, chunk_size - shift))
+    big_tree.blit(get_rotated_image(tree_image, randint(0, 359)), Vector2(chunk_size - shift, chunk_size - shift))
 
     map_elements = pygame.Surface((map_size.x, map_size.y), pygame.SRCALPHA)
 
     width = int(map_size.x / chunk_size)
     height = int(map_size.y / chunk_size)
 
-    middle_x = width//2
-    middle_y = height//2
+    middle_x = width // 2
+    middle_y = height // 2
 
-    def at_hero_starting_pos(x, y):
-        return x == middle_x or x == middle_x+1 or y == middle_y or y == middle_y + 1
+    def at_hero_starting_pos(a, b):
+        return a == middle_x or a == middle_x + 1 or b == middle_y or b == middle_y + 1
 
-
-    def can_place_big_tree(x, y):
+    def can_place_big_tree(a, b):
         for k in range(-1, 3):
-            for l in range(-1, 3):
-                if array[x+k][y+l] == 0 and not at_hero_starting_pos(x+k, y+l):
+            for m in range(-1, 3):
+                if array[a + k][b + m] == 0 and not at_hero_starting_pos(a + k, b + m):
                     return False
 
         return True
 
-    #available_places_array = [[False for _ in range(1, width - 2)] for _ in range(1, height - 2)]
     available_places_list = list()
 
     for i in range(1, width - 2, 2):
         for j in range(1, height - 2, 2):
             if can_place_big_tree(i, j):
-                #available_places_array[i][j] = True
                 available_places_list.append((i, j))
 
-    for _ in range(min(10,len(available_places_list)//2)):
-        index = randint(0,len(available_places_list)-1)
+    for _ in range(min(40, len(available_places_list) // 2)):
+        index = randint(0, len(available_places_list) - 1)
         x, y = available_places_list.pop(index)
-        array[x][y] = array[x+1][y] = array[x][y+1] = array[x+1][y+1] = 2
+        array[x][y] = array[x + 1][y] = array[x][y + 1] = array[x + 1][y + 1] = 2
 
         map_elements.blit(big_tree,
                           Vector2(x * chunk_size - shift, y * chunk_size - shift))
 
     return map_elements
-

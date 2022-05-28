@@ -11,7 +11,7 @@ class DroppedItemType(Enum):
     Grenades = auto()
 
 
-def load_images():
+def _load_images():
     images = list()
     images.append(pygame.image.load("assets/first_aid_kit.png"))
     images.append(pygame.image.load("assets/ammo_pack.png"))
@@ -22,7 +22,7 @@ def load_images():
 
 
 class DroppedItem:
-    __images = load_images()
+    __images = _load_images()
 
     def __init__(self, map_position, item_type):
         self.__image = self.choose_image(item_type)
@@ -35,17 +35,18 @@ class DroppedItem:
     def choose_image(cls, item_type):
         return cls.__images[item_type.value - 1]
 
-    def get_image(self):
-        return self.__image
-
-    def get_screen_position(self, camera_position):
-        return pygame.Vector2(self.__map_position.x - camera_position.x, self.__map_position.y - camera_position.y)
-
-    def get_map_position(self):
-        return self.__map_position
-
-    def get_size(self):
+    @property
+    def size(self):
         return self.__size
 
-    def get_type(self):
+    @property
+    def image(self):
+        return self.__image
+
+    @property
+    def map_position(self):
+        return self.__map_position
+
+    @property
+    def type(self):
         return self.__type
