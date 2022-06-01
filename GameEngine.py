@@ -5,6 +5,7 @@ from pygame.math import Vector2
 
 from Map import Map
 from ImageHandler import ImageHandler
+from Weapon import WeaponType
 
 
 class GameEngine:
@@ -25,9 +26,6 @@ class GameEngine:
         running = True
         hero_alive = True
         game_over = True
-        grenade = False
-        pistol = True
-        shotgun = False
         fps = 60
         fps_clock = pygame.time.Clock()
         monster_clock = pygame.time.Clock()
@@ -54,63 +52,36 @@ class GameEngine:
                     """can shoot with all mouse buttons"""
                     # self.__map.add_bullet()
 
-                    if pistol and self.__map.hero.get_no_bullets_in_the_chamber() > 0:
-                        """shoot only with left button"""
-                        if event.button == 1:
+                    """shoot only with left button"""
+                    if event.button == 1:
+                        curr_weapon = self.__map.hero.weapons.current_weapon
+                        in_chamber = self.__map.hero.weapons.in_chamber
+                        if curr_weapon == WeaponType.pistol and in_chamber > 0:
                             self.__map.add_bullet(1)
 
-                    elif grenade and self.__map.hero.get_no_grenades_in_pocket() > 0:
-                        """shoot only with left button"""
-                        if event.button == 1:
+                        elif curr_weapon == WeaponType.grenade and in_chamber > 0:
                             self.__map.add_grenade()
 
-                    elif shotgun and self.__map.hero.get_no_shells_in_chamber() > 0:
-                        """shoot only with left button"""
-                        if event.button == 1:
+                        elif curr_weapon == WeaponType.shotgun and in_chamber > 0:
                             self.__map.shotgun_shot(1)
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 4:
-                        if pistol:
-                            pistol, grenade, shotgun = False, True, False
-                        elif grenade:
-                            pistol, grenade, shotgun = False, False, True
-                        elif shotgun:
-                            pistol, grenade, shotgun = True, False, False
+                        self.__map.hero.weapons.set_next_weapon()
                     elif event.button == 5:
-                        if pistol:
-                            pistol, grenade, shotgun = False, False, True
-                        elif grenade:
-                            pistol, grenade, shotgun = True, False, False
-                        elif shotgun:
-                            pistol, grenade, shotgun = False, True, False
+                        self.__map.hero.weapons.set_prev_weapon()
 
                 if event.type == pygame.KEYDOWN:
-
                     if event.key == pygame.K_r:
-                        if pistol:
-                            if self.__map.hero.get_no_ammo_packs() > 0:
-                                self.__image_handler.reload_time = (time())
-                        if grenade:
-                            if self.__map.hero.get_no_grenades_packs() > 0:
-                                self.__image_handler.reload_time = (time())
-
-                        if shotgun:
-                            if self.__map.hero.get_no_shotgun_packs() > 0:
-                                self.__image_handler.reload_time = (time())
+                        if self.__map.hero.weapons.packs > 0:
+                            self.__image_handler.reload_time = (time())
 
                     if event.key == pygame.K_3:
-                        pistol = False
-                        grenade = True
-                        shotgun = False
+                        self.__map.hero.weapons.update_current_weapon(WeaponType.grenade)
                     elif event.key == pygame.K_2:
-                        pistol = True
-                        grenade = False
-                        shotgun = False
+                        self.__map.hero.weapons.update_current_weapon(WeaponType.pistol)
                     elif event.key == pygame.K_1:
-                        pistol = False
-                        grenade = False
-                        shotgun = True
+                        self.__map.hero.weapons.update_current_weapon(WeaponType.shotgun)
 
                     if event.key == pygame.K_w:
                         move_direction_flags["up"] = True
@@ -146,7 +117,7 @@ class GameEngine:
             """clears screen"""
             self.__screen.fill((0, 102, 0))
             """draws  map elements and ammo """
-            self.__draw_all(self.__map.camera_position, pistol, grenade, shotgun)
+            self.__draw_all(self.__map.camera_position)
 
             pygame.display.update()
             fps_clock.tick(int(fps / (1 + len(self.__map.monsters) * 0.01)))
@@ -183,7 +154,7 @@ class GameEngine:
         self.__map.move_monsters(self.__dt * 75)
         self.__map.move_bullets_and_grenades(self.__dt * 1000)
 
-    def __draw_all(self, camera_position, pistol, grenade, shotgun):
+    def __draw_all(self, camera_position):
 
         """show grass"""
         self.__screen.blit(self.__image_handler.grassland_image, Vector2(0, 0),
@@ -226,63 +197,51 @@ class GameEngine:
         pygame.draw.rect(self.__screen, (255, 0, 0), (20, 20, self.__map.hero.max_hp * 35, 20))
         pygame.draw.rect(self.__screen, (0, 255, 0), (20, 20, self.__map.hero.hp * 35, 20))
 
-        "show remaining ammo in chamber"
-        ammo_shift = 20
-        if pistol:
-            for i in range(self.__map.hero.get_no_bullets_in_the_chamber()):
-                self.__screen.blit(self.__image_handler.bullet_image, (ammo_shift, 520))
-                ammo_shift += self.__image_handler.bullet_image.get_size()[0]
-        elif grenade:
-            for i in range(self.__map.hero.get_no_grenades_in_pocket()):
-                self.__screen.blit(self.__image_handler.grenade_image, (ammo_shift, 520))
-                ammo_shift += self.__image_handler.grenade_image.get_size()[0]
-        elif shotgun:
-            for i in range(self.__map.hero.get_no_shells_in_chamber()):
-                self.__screen.blit(self.__image_handler.shell_image, (ammo_shift, 500))
-                ammo_shift += self.__image_handler.shell_image.get_size()[0]
-
         "show score"
         score = self.__font.render("Score " + str(self.__map.score), True, (255, 255, 255))
         self.__screen.blit(score, (640, 10))
+
         """show fps"""
         curren_fps = self.__font.render("fps:" + str(int(1.0 // self.__dt)), True, (255, 255, 255))
         self.__screen.blit(curren_fps, (500, 10))
+
         """show no_monsters"""
         no_monsters = self.__font.render("m:" + str(len(self.__map.monsters)), True, (255, 255, 255))
         self.__screen.blit(no_monsters, (400, 10))
-        "show remaining ammo"
-        x = ""
-        if pistol:
-            x = "p"
+
+        "show remaining ammo and draw ammo in chamber"
+        ammo_shift = 20
+        pos = (ammo_shift, 520)
+        img = None
+        curr_weapon = self.__map.hero.weapons.current_weapon
+
+        if curr_weapon == WeaponType.pistol:
+            img = self.__image_handler.bullet_image
             self.__screen.blit(self.__image_handler.ammo_image, (660, 510))
-        elif grenade:
-            x = "g"
+        elif curr_weapon == WeaponType.grenade:
+            img = self.__image_handler.grenade_image
             self.__screen.blit(self.__image_handler.grenades_image, (600, 510))
-        elif shotgun:
-            x = "s"
+        elif curr_weapon == WeaponType.shotgun:
+            img = self.__image_handler.shell_image
+            pos = (pos[0], 500)
             self.__screen.blit(self.__image_handler.shotgun_shells_image, (640, 510))
 
-        ammo = self.__font2.render(str(self.__map.hero.get_no_ammo(x)), True, (255, 255, 255))
+        img_size = img.get_size()[0]
+
+        for i in range(self.__map.hero.weapons.in_chamber):
+            self.__screen.blit(img, pos)
+            ammo_shift += img_size
+            pos = (ammo_shift, pos[1])
+
+        ammo = self.__font2.render(str(self.__map.hero.get_no_ammo()), True, (255, 255, 255))
         self.__screen.blit(ammo, (715, 530))
 
         "show reloading img"
         if self.__image_handler.reload_time != 0 and self.__image_handler.reload_time + 1 < time():
-            no_ammo_packs = self.__map.hero.get_no_ammo_packs()
-            no_grenades = self.__map.hero.get_no_grenades_packs()
-            no_shotgun = self.__map.hero.get_no_shotgun_packs()
-            if no_ammo_packs > 0 and pistol:
-                self.__map.hero.change_no_ammo_packs(-1)
-                self.__map.hero.set_no_bullets_in_the_chamber(8)
-                self.__image_handler.reload_time = 0
-
-            if no_grenades > 0 and grenade:
-                self.__map.hero.change_no_grenades_packs(-1)
-                self.__map.hero.set_no_grenades_in_pocket(3)
-                self.__image_handler.reload_time = 0
-
-            if no_shotgun > 0 and shotgun:
-                self.__map.hero.change_no_shotgun_packs(-1)
-                self.__map.hero.set_no_shells_in_chamber(4)
+            ammo_packs = self.__map.hero.weapons.packs
+            if ammo_packs > 0:
+                self.__map.hero.weapons.updated_ammo_packs(curr_weapon, -1)
+                self.__map.hero.weapons.reload()
                 self.__image_handler.reload_time = 0
 
         elif self.__image_handler.reload_time != 0 and self.__image_handler.reload_time + 1 > time():

@@ -3,6 +3,7 @@ import pygame
 from pygame.math import Vector2
 from DroppedItem import DroppedItemType
 from Utils import generate_images
+from Weapon import WeaponType, Weapons
 
 
 class Hero:
@@ -15,12 +16,7 @@ class Hero:
         self.__angle = 0
         self.__screen_position = Vector2(screen_size.x / 2 - self.size.x / 2,
                                          screen_size.y / 2 - self.size.y / 2)
-        self.__bullets_in_the_chamber = 8
-        self.__grenades_in_pocket = 3
-        self.__shotgun_shells_in_chamber = 4
-        self.__no_ammo_packs = 20
-        self.__no_grenade_packs = 3
-        self.__no_shotgun_shells_packs = 10
+        self.__weapons = Weapons()
         self.__max_hp = 5
         self.__hp = 5
 
@@ -40,67 +36,29 @@ class Hero:
         if item.type == DroppedItemType.FirstAidKit:
             self.__hp = self.__max_hp
         elif item.type == DroppedItemType.AmmoPack:
-            self.change_no_ammo_packs(2)
+            self.__weapons.updated_ammo_packs(WeaponType.pistol, 2)
         elif item.type == DroppedItemType.ShotgunShells:
-            self.change_no_shotgun_packs(2)
+            self.__weapons.updated_ammo_packs(WeaponType.shotgun, 2)
         elif item.type == DroppedItemType.Grenades:
-            self.change_no_grenades_packs(1)
+            self.__weapons.updated_ammo_packs(WeaponType.grenade, 1)
 
-    def get_no_bullets_in_the_chamber(self):
-        return self.__bullets_in_the_chamber
-
-    def set_no_bullets_in_the_chamber(self, x):
-        self.__bullets_in_the_chamber = x
-
-    def get_no_grenades_in_pocket(self):
-        return self.__grenades_in_pocket
-
-    def set_no_grenades_in_pocket(self, x):
-        self.__grenades_in_pocket = x
-
-    def get_no_shells_in_chamber(self):
-        return self.__shotgun_shells_in_chamber
-
-    def set_no_shells_in_chamber(self, x):
-        self.__shotgun_shells_in_chamber = x
-
-    def get_no_ammo_packs(self):
-        return self.__no_ammo_packs
-
-    def change_no_ammo_packs(self, num):
-        self.__no_ammo_packs += num
-
-    def get_no_grenades_packs(self):
-        return self.__no_grenade_packs
-
-    def change_no_grenades_packs(self, x):
-        self.__no_grenade_packs += x
-
-    def get_no_shotgun_packs(self):
-        return self.__no_shotgun_shells_packs
-
-    def change_no_shotgun_packs(self, x):
-        self.__no_shotgun_shells_packs += x
-
-    def get_no_ammo(self, weapon_type):
-        if weapon_type == "p":
-            return self.__no_ammo_packs * 8 + self.__bullets_in_the_chamber
-        elif weapon_type == "g":
-            return self.__no_grenade_packs * 3 + self.__grenades_in_pocket
-        elif weapon_type == "s":
-            return self.__no_shotgun_shells_packs * 4 + self.__shotgun_shells_in_chamber
-
-    def get_no_grenades(self):
-        return self.__no_grenade_packs * 3 + self.__grenades_in_pocket
-
-    def get_no_shotgun_shells(self):
-        return self.__no_shotgun_shells_packs * 4 + self.__shotgun_shells_in_chamber
+    def get_no_ammo(self):
+        if self.__weapons.current_weapon == WeaponType.pistol:
+            return self.__weapons.packs * 8 + self.__weapons.in_chamber
+        elif self.__weapons.current_weapon == WeaponType.grenade:
+            return self.__weapons.packs * 3 + self.__weapons.in_chamber
+        elif self.__weapons.current_weapon == WeaponType.shotgun:
+            return self.__weapons.packs * 4 + self.__weapons.in_chamber
 
     def hurt(self, value):
         self.__hp -= value
 
     def heal(self):
         self.__hp = self.__max_hp
+
+    @property
+    def weapons(self):
+        return self.__weapons
 
     @property
     def size(self):

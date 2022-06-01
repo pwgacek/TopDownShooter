@@ -136,18 +136,17 @@ class Map:
         return self.__array[int(cords.x)][int(cords.y)] % 2 == 0
 
     def add_bullet(self, damage):
-        self.__hero.set_no_bullets_in_the_chamber(self.__hero.get_no_bullets_in_the_chamber() - 1)
+        self.__hero.weapons.update_in_chamber(self.__hero.weapons.in_chamber - 1)
         angle = self.__hero.angle + 90
         self.__bullets.append(Bullet(center_map_position(self.__hero), angle, damage))
 
     def add_grenade(self):
-        self.__hero.set_no_grenades_in_pocket(self.__hero.get_no_grenades_in_pocket() - 1)
+        self.__hero.weapons.update_in_chamber(self.__hero.weapons.in_chamber - 1)
         angle = self.__hero.angle + 90
         self.__grenades.append(Grenade(center_map_position(self.__hero), angle, time()))
 
     def shotgun_shot(self, damage):
-        self.__hero.set_no_shells_in_chamber(self.__hero.get_no_shells_in_chamber() - 1)
-
+        self.__hero.weapons.update_in_chamber(self.__hero.weapons.in_chamber - 1)
         angle = self.__hero.angle + 90
 
         for i in range(4):
@@ -269,7 +268,9 @@ class Map:
 
     def __grenade_explodes(self, grenade):
         for i in range(16):
-            self.__bullets.append(Bullet(grenade.map_position, grenade.angle + (i + 1) * 22.5, 4))
+            """one bullet less - less likely to get hit"""
+            if i != 7:
+                self.__bullets.append(Bullet(grenade.map_position, grenade.angle + (i + 1) * 22.5, 4))
 
         self.__grenades.remove(grenade)
 
