@@ -268,9 +268,13 @@ class Map:
 
     def __grenade_explodes(self, grenade):
         for i in range(16):
+
+            """16 bullets but angle moved few degrees - less collisions with player"""
+            # self.__bullets.append(Bullet(grenade.map_position, (grenade.angle + 11.25) + (i + 1) * 22.5, 4))
+
             """one bullet less - less likely to get hit"""
             if i != 7:
-                self.__bullets.append(Bullet(grenade.map_position, grenade.angle + (i + 1) * 22.5, 4))
+                self.__bullets.append(Bullet(grenade.map_position, (grenade.angle+11.25) + (i + 1) * 22.5, 4))
 
         self.__grenades.remove(grenade)
 
