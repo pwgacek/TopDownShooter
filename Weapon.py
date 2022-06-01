@@ -1,5 +1,3 @@
-import pygame
-from pygame import Vector2
 from enum import Enum, auto, unique
 
 
@@ -17,18 +15,6 @@ class Weapons:
         self.__in_chamber = [8, 4, 3]
         self.__packs = [20, 10, 3]
 
-    @property
-    def in_chamber(self):
-        return self.__in_chamber[self.__current_weapon.value-1]
-
-    @property
-    def packs(self):
-        return self.__packs[self.__current_weapon.value-1]
-
-    @property
-    def current_weapon(self):
-        return self.__current_weapon
-
     def update_current_weapon(self, weapon_type):
         self.__current_weapon = weapon_type
 
@@ -43,7 +29,7 @@ class Weapons:
             self.__in_chamber[WeaponType.pistol.value-1] = 8
         elif self.__current_weapon == WeaponType.shotgun:
             self.__in_chamber[WeaponType.shotgun.value-1] = 4
-        else :
+        else:
             self.__in_chamber[WeaponType.grenade.value - 1] = 3
 
     def set_next_weapon(self):
@@ -61,4 +47,15 @@ class Weapons:
             self.__current_weapon = WeaponType.pistol
         else:
             self.__current_weapon = WeaponType.grenade
-            
+
+    @property
+    def in_chamber(self):
+        return self.__in_chamber[self.__current_weapon.value-1]
+
+    @property
+    def packs(self):
+        return self.__packs[self.__current_weapon.value-1]
+
+    @property
+    def current_weapon(self):
+        return self.__current_weapon

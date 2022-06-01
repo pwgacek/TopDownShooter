@@ -28,6 +28,7 @@ class GameEngine:
         game_over = True
         fps = 60
         fps_clock = pygame.time.Clock()
+        details_flags = [False, True]
         monster_clock = pygame.time.Clock()
         self.__map = Map(Vector2(self.__screen.get_size()))
         self.__image_handler = ImageHandler(self.__map.chunk_size, self.__map.size, self.__map.array)
@@ -72,16 +73,30 @@ class GameEngine:
                         self.__map.hero.weapons.set_prev_weapon()
 
                 if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_F3:
+                        if not details_flags[0]:
+                            details_flags[0] = True
+                        else:
+                            details_flags[0] = False
+
+                    if event.key == pygame.K_F4:
+                        if not details_flags[1]:
+                            details_flags[1] = True
+                        else:
+                            details_flags[1] = False
+
                     if event.key == pygame.K_r:
                         if self.__map.hero.weapons.packs > 0:
                             self.__image_handler.reload_time = (time())
 
-                    if event.key == pygame.K_3:
-                        self.__map.hero.weapons.update_current_weapon(WeaponType.grenade)
-                    elif event.key == pygame.K_2:
-                        self.__map.hero.weapons.update_current_weapon(WeaponType.pistol)
-                    elif event.key == pygame.K_1:
-                        self.__map.hero.weapons.update_current_weapon(WeaponType.shotgun)
+                    """ can't change weapon while reloading"""
+                    if self.__image_handler.reload_time == 0:
+                        if event.key == pygame.K_3:
+                            self.__map.hero.weapons.update_current_weapon(WeaponType.grenade)
+                        elif event.key == pygame.K_2:
+                            self.__map.hero.weapons.update_current_weapon(WeaponType.pistol)
+                        elif event.key == pygame.K_1:
+                            self.__map.hero.weapons.update_current_weapon(WeaponType.shotgun)
 
                     if event.key == pygame.K_w:
                         move_direction_flags["up"] = True
@@ -117,7 +132,7 @@ class GameEngine:
             """clears screen"""
             self.__screen.fill((0, 102, 0))
             """draws  map elements and ammo """
-            self.__draw_all(self.__map.camera_position)
+            self.__draw_all(self.__map.camera_position, details_flags)
 
             pygame.display.update()
             fps_clock.tick(int(fps / (1 + len(self.__map.monsters) * 0.01)))
@@ -154,7 +169,7 @@ class GameEngine:
         self.__map.move_monsters(self.__dt * 75)
         self.__map.move_bullets_and_grenades(self.__dt * 1000)
 
-    def __draw_all(self, camera_position):
+    def __draw_all(self, camera_position, details_flags):
 
         """show grass"""
         self.__screen.blit(self.__image_handler.grassland_image, Vector2(0, 0),
@@ -202,12 +217,14 @@ class GameEngine:
         self.__screen.blit(score, (640, 10))
 
         """show fps"""
-        curren_fps = self.__font.render("fps:" + str(int(1.0 // self.__dt)), True, (255, 255, 255))
-        self.__screen.blit(curren_fps, (500, 10))
+        if details_flags[0]:
+            curren_fps = self.__font.render("fps:" + str(int(1.0 // self.__dt)), True, (255, 255, 255))
+            self.__screen.blit(curren_fps, (400, 10))
 
         """show no_monsters"""
-        no_monsters = self.__font.render("m:" + str(len(self.__map.monsters)), True, (255, 255, 255))
-        self.__screen.blit(no_monsters, (400, 10))
+        if details_flags[1]:
+            no_monsters = self.__font.render("m:" + str(len(self.__map.monsters)), True, (255, 255, 255))
+            self.__screen.blit(no_monsters, (530, 10))
 
         "show remaining ammo and draw ammo in chamber"
         ammo_shift = 20
