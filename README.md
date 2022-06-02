@@ -1,6 +1,6 @@
 # TopDownShooter
 python project - IV semester<br>
-python version: 3.9
+python version: 3.9.13
 ## Objective
 Try to survive
 ## Controls
