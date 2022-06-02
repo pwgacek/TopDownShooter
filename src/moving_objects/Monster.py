@@ -5,9 +5,9 @@ import pygame
 from pygame.math import Vector2
 from time import time
 from random import randint
-from DroppedItem import DroppedItem
-from DroppedItem import DroppedItemType
-from Utils import get_distance, center_map_position, generate_images
+from src.aggregates.DroppedItem import DroppedItem
+from src.aggregates.DroppedItem import DroppedItemType
+from src.utilities.Utils import get_distance, center_map_position, generate_images
 
 
 class Monster:

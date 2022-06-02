@@ -1,9 +1,9 @@
 import math
 import pygame
 from pygame.math import Vector2
-from DroppedItem import DroppedItemType
-from Utils import generate_images
-from Weapon import WeaponType, Weapons
+from src.aggregates.DroppedItem import DroppedItemType
+from src.utilities.Utils import generate_images
+from src.aggregates.Weapon import WeaponType, Weapons
 
 
 class Hero:

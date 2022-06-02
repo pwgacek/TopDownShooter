@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 from math import atan2
 from random import randint
 from pygame import Vector2
-from Utils import get_rotated_image
+from src.utilities.Utils import get_rotated_image
 
 
 def __generate_vertexes(no_vertexes, height, width, x_space, y_space):

@@ -1,6 +1,6 @@
 import pygame
-from Utils import get_rotated_image
-from MapGenerator import generate_borders, generate_grass, generate_map_elements
+from src.utilities.Utils import get_rotated_image
+from src.utilities.MapGenerator import generate_borders, generate_grass, generate_map_elements
 
 
 class ImageHandler:

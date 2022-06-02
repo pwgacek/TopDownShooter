@@ -24,6 +24,11 @@ class Grenade:
 
     @classmethod
     @property
+    def image(cls):
+        return cls.__image
+
+    @classmethod
+    @property
     def size(cls):
         return cls.__size
 

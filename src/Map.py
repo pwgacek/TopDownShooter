@@ -4,12 +4,12 @@ from time import time
 
 from pygame.math import Vector2
 
-from Bullet import Bullet
-from Hero import Hero
-from MapGenerator import generate_array
-from Monster import Monster
-from Grenade import Grenade
-from Utils import get_distance, center_map_position
+from src.moving_objects.Bullet import Bullet
+from src.moving_objects.Hero import Hero
+from src.utilities.MapGenerator import generate_array
+from src.moving_objects.Monster import Monster
+from src.moving_objects.Grenade import Grenade
+from src.utilities.Utils import get_distance, center_map_position
 
 
 class Map:

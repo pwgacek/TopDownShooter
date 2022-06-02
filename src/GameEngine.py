@@ -4,9 +4,10 @@ import pygame
 from pygame.math import Vector2
 
 from Map import Map
-from ImageHandler import ImageHandler
-from Weapon import WeaponType
-
+from src.utilities.ImageHandler import ImageHandler
+from src.aggregates.Weapon import WeaponType
+from src.moving_objects.Bullet import Bullet
+from src.moving_objects.Grenade import Grenade
 
 class GameEngine:
     def __init__(self):
@@ -28,7 +29,7 @@ class GameEngine:
         game_over = True
         fps = 60
         fps_clock = pygame.time.Clock()
-        details_flags = [False, True]
+        details_flags = [False, False]
         monster_clock = pygame.time.Clock()
         self.__map = Map(Vector2(self.__screen.get_size()))
         self.__image_handler = ImageHandler(self.__map.chunk_size, self.__map.size, self.__map.array)
@@ -192,12 +193,12 @@ class GameEngine:
 
         for bullet in self.__map.bullets:
             if self.__map.is_on_screen(bullet):
-                self.__screen.blit(pygame.transform.rotate(pygame.image.load("assets/bullet.png"), bullet.angle - 90),
+                self.__screen.blit(pygame.transform.rotate(Bullet.image, bullet.angle - 90),
                                    self.__map.get_screen_position(bullet))
 
         for grenade in self.__map.grenades:
             if self.__map.is_on_screen(grenade):
-                self.__screen.blit(pygame.transform.rotate(pygame.image.load("assets/grenade.png"), grenade.angle - 90),
+                self.__screen.blit(pygame.transform.rotate(Grenade.image, grenade.angle - 90),
                                    self.__map.get_screen_position(grenade))
 
         """shows forest on the screen"""

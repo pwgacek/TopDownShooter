@@ -27,6 +27,11 @@ class Bullet:
     def size(cls):
         return cls.__size
 
+    @classmethod
+    @property
+    def image(cls):
+        return cls.__image
+
     @property
     def angle(self):
         return self.__angle
