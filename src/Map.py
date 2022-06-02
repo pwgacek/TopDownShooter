@@ -153,11 +153,11 @@ class Map:
             self.__bullets.append(Bullet(center_map_position(self.__hero), angle - 15 + i * 10, damage))
 
     def __remove_bullets_and_grenades(self):
-        for i in self.__bullets:
+        for i in list(self.__bullets):
             if self.__bullet_not_in_bounds(i):
                 self.__bullets.remove(i)
 
-        for i in self.__grenades:
+        for i in list(self.__grenades):
             if self.__bullet_not_in_bounds(i):
                 self.__grenades.remove(i)
 
@@ -214,17 +214,17 @@ class Map:
 
         """hero grabs dropped item"""
         dist = self.__hero.size.x // 2
-        for item in self.__dropped_items:
+        for item in list(self.__dropped_items):
             if get_distance(self.__hero, item) < dist:
                 self.__hero.pick_up_dropped_item(item)
                 self.__dropped_items.remove(item)
 
         """bullet hits monster or tree"""
-        for bullet in self.__bullets:
+        for bullet in list(self.__bullets):
             if self.__bullet_hit_map_element(bullet.map_position):
                 self.__bullets.remove(bullet)
             else:
-                for monster in self.__monsters:
+                for monster in list(self.__monsters):
                     if get_distance(monster, bullet) < bullet_h + monster_h:
                         self.__bullets.remove(bullet)
                         monster.hurt(time(), bullet.damage)
@@ -240,18 +240,21 @@ class Map:
         """grenades explode (time)"""
         now = time()
         grenade_time_to_explode = 2
-        for grenade in self.__grenades:
+        for grenade in list(self.__grenades):
             if now - grenade.create_time >= grenade_time_to_explode:
                 self.__grenade_explodes(grenade)
+                self.__grenades.remove(grenade)
 
         """grenade hits monster or tree"""
-        for grenade in self.__grenades:
+        for grenade in list(self.__grenades):
             if self.__bullet_hit_map_element(grenade.map_position):
                 self.__grenade_explodes(grenade)
+                self.__grenades.remove(grenade)
             else:
                 for monster in self.__monsters:
                     if get_distance(monster, grenade) < grenade_h + monster_h:
                         self.__grenade_explodes(grenade)
+                        self.__grenades.remove(grenade)
                         break
 
         """monster attacks hero"""
@@ -261,22 +264,19 @@ class Map:
                     monster.attack()
                     self.__hero.hurt(1)
         """bullet hits hero"""
-        for bullet in self.__bullets:
+        for bullet in list(self.__bullets):
             if get_distance(self.__hero, bullet) < bullet_h + hero_h:
                 self.__bullets.remove(bullet)
                 self.__hero.hurt(bullet.damage)
 
     def __grenade_explodes(self, grenade):
         for i in range(16):
-
             """16 bullets but angle moved few degrees - less collisions with player"""
             self.__bullets.append(Bullet(grenade.map_position, (grenade.angle + 11.25) + (i + 1) * 22.5, 4))
 
             """one bullet less - less likely to get hit"""
             # if i != 7:
             #     self.__bullets.append(Bullet(grenade.map_position, grenade.angle + (i + 1) * 22.5, 4))
-
-        self.__grenades.remove(grenade)
 
     @property
     def camera_position(self):

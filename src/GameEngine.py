@@ -9,6 +9,7 @@ from src.aggregates.Weapon import WeaponType
 from src.moving_objects.Bullet import Bullet
 from src.moving_objects.Grenade import Grenade
 
+
 class GameEngine:
     def __init__(self):
         pygame.init()
