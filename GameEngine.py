@@ -66,7 +66,7 @@ class GameEngine:
                         elif curr_weapon == WeaponType.shotgun and in_chamber > 0:
                             self.__map.shotgun_shot(1)
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and self.__image_handler.reload_time == 0:
                     if event.button == 4:
                         self.__map.hero.weapons.set_next_weapon()
                     elif event.button == 5:

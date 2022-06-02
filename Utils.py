@@ -26,5 +26,3 @@ def get_rotated_image(image, angle):
 
 def generate_images(image):
     return [get_rotated_image(image, angle) for angle in range(360)]
-
-
