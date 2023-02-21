@@ -11,7 +11,7 @@ from src.utilities.Utils import get_distance, center_map_position, generate_imag
 
 
 class Monster:
-    __image = pygame.image.load("assets/monster1.png")
+    __image = pygame.image.load("../assets/monster1.png")
     __images = generate_images(__image)
     __size = Vector2(__image.get_size())
 

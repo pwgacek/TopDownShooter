@@ -4,7 +4,7 @@ import math
 
 
 class Bullet:
-    __image = pygame.image.load("assets/bullet.png")
+    __image = pygame.image.load("../assets/bullet.png")
     __size = Vector2(__image.get_size())
 
     def __init__(self, map_position, angle, damage):

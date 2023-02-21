@@ -4,7 +4,7 @@ import math
 
 
 class Grenade:
-    __image = pygame.image.load("assets/grenade.png")
+    __image = pygame.image.load("../assets/grenade.png")
     __size = Vector2(__image.get_size())
 
     def __init__(self, map_position, angle, create_time):

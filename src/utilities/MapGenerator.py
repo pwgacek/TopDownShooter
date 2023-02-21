@@ -74,7 +74,7 @@ def generate_array(no_vertexes,  map_width, map_height, chunk_size, screen_size)
 
 
 def generate_borders(chunk_size, map_size, array):
-    tree_image = pygame.image.load("assets/tree3.png")
+    tree_image = pygame.image.load("../assets/tree3.png")
     borders = pygame.Surface((map_size.x, map_size.y), pygame.SRCALPHA)
     width = int(map_size.x / chunk_size)
     height = int(map_size.y / chunk_size)
@@ -91,9 +91,9 @@ def generate_borders(chunk_size, map_size, array):
 
 def generate_grass(chunk_size, map_size, array):
     grass = list()
-    grass.append(pygame.image.load("assets/grass1.png"))
-    grass.append(pygame.image.load("assets/grass2.png"))
-    grass.append(pygame.image.load("assets/grass3.png"))
+    grass.append(pygame.image.load("../assets/grass1.png"))
+    grass.append(pygame.image.load("../assets/grass2.png"))
+    grass.append(pygame.image.load("../assets/grass3.png"))
 
     grassland = pygame.Surface((map_size.x, map_size.y), pygame.SRCALPHA)
     width = int(map_size.x / chunk_size)
@@ -111,7 +111,7 @@ def generate_grass(chunk_size, map_size, array):
 
 
 def generate_map_elements(chunk_size, map_size, array):
-    tree_image = pygame.image.load("assets/tree3.png")
+    tree_image = pygame.image.load("../assets/tree3.png")
     shift = (tree_image.get_size()[0] - chunk_size) / 2
 
     big_tree = pygame.Surface((2 * chunk_size + shift, 2 * chunk_size + 2 * shift), pygame.SRCALPHA)

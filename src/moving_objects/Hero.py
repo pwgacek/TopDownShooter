@@ -11,7 +11,7 @@ class Hero:
     def __init__(self, map_position, screen_size):
 
         self.__map_position = map_position
-        self.__images = generate_images(pygame.image.load("assets/hero2.2.png"))
+        self.__images = generate_images(pygame.image.load("../assets/hero2.2.png"))
         self.__size = Vector2(self.__images[0].get_size())
         self.__angle = 0
         self.__screen_position = Vector2(screen_size.x / 2 - self.size.x / 2,

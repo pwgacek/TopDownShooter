@@ -5,13 +5,13 @@ from src.utilities.MapGenerator import generate_borders, generate_grass, generat
 
 class ImageHandler:
     def __init__(self, chunk_size, map_size, array):
-        self.__bullet_image = pygame.image.load("assets/ammo1.png")
-        self.__grenade_image = pygame.image.load("assets/grenade_ico.png")
-        self.__shell_image = pygame.image.load("assets/shotgun_shell.png")
-        self.__reload_image = pygame.image.load("assets/reload.png")
-        self.__ammo_image = pygame.image.load("assets/ammo_pack2.png")
-        self.__grenades_image = pygame.image.load("assets/many_granedesv2.png")
-        self.__shotgun_shells_image = pygame.image.load("assets/shotgun_shellsv2.png")
+        self.__bullet_image = pygame.image.load("../assets/ammo1.png")
+        self.__grenade_image = pygame.image.load("../assets/grenade_ico.png")
+        self.__shell_image = pygame.image.load("../assets/shotgun_shell.png")
+        self.__reload_image = pygame.image.load("../assets/reload.png")
+        self.__ammo_image = pygame.image.load("../assets/ammo_pack2.png")
+        self.__grenades_image = pygame.image.load("../assets/many_granedesv2.png")
+        self.__shotgun_shells_image = pygame.image.load("../assets/shotgun_shellsv2.png")
 
         self.__borders = generate_borders(chunk_size, map_size, array)
         self.__grassland = generate_grass(chunk_size, map_size, array)

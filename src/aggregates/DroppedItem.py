@@ -13,10 +13,10 @@ class DroppedItemType(Enum):
 
 def _load_images():
     images = list()
-    images.append(pygame.image.load("assets/first_aid_kit.png"))
-    images.append(pygame.image.load("assets/ammo_pack.png"))
-    images.append(pygame.image.load("assets/dropped_shotgun_shells.png"))
-    images.append(pygame.image.load("assets/dropped_grenades.png"))
+    images.append(pygame.image.load("../assets/first_aid_kit.png"))
+    images.append(pygame.image.load("../assets/ammo_pack.png"))
+    images.append(pygame.image.load("../assets/dropped_shotgun_shells.png"))
+    images.append(pygame.image.load("../assets/dropped_grenades.png"))
 
     return images
 
